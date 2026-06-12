@@ -324,20 +324,27 @@ const Dashboard = ({ student }) => {
             </thead>
             <tbody>
               {[
-                { name: "국어", grades: [4, 3, null, null] },
-                { name: "수학", grades: [4, 5, 5, 6] },
-                { name: "영어", grades: [3, 3, null, null] },
-                { name: "사회", grades: [3, 4, null, 6] },
-                { name: "과학", grades: [6, 5, 6, null] }
+                { name: "국어", grades: [4, 3, null, null], subjects: ["국어", "국어", "", ""] },
+                { name: "수학", grades: [4, 5, 5, 6], subjects: ["수학", "수학", "수학Ⅰ", "수학Ⅱ"] },
+                { name: "영어", grades: [3, 3, null, null], subjects: ["영어", "영어", "", ""] },
+                { name: "사회", grades: [3, 4, null, 6], subjects: ["통사", "통사", "", "사회·문화"] },
+                { name: "과학", grades: [6, 5, 6, null], subjects: ["통과학", "통과학", "생명Ⅰ", ""] }
               ].map((subject, idx) => (
                 <tr key={idx} className="border-b border-gray-100 dark:border-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/10 smooth-transition">
                   <td className="py-4 px-4 font-bold text-gray-800 dark:text-gray-200">{subject.name}</td>
                   {subject.grades.map((grade, i) => (
                     <td key={i} className="py-4 px-4 text-center">
                       {grade ? (
-                        <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold shadow-lg">
-                          {grade}
-                        </span>
+                        <div className="flex flex-col items-center gap-1">
+                          {subject.subjects[i] && (
+                            <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400">
+                              {subject.subjects[i]}
+                            </span>
+                          )}
+                          <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold shadow-lg">
+                            {grade}
+                          </span>
+                        </div>
                       ) : (
                         <span className="text-gray-300 dark:text-gray-600">—</span>
                       )}
