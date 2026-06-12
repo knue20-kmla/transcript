@@ -305,6 +305,51 @@ const Dashboard = ({ student }) => {
         </div>
       </div>
 
+      {/* 교과군별 등급 추이 */}
+      <div className="glass rounded-3xl p-8">
+        <h3 className="text-2xl font-bold mb-6 gradient-text flex items-center gap-2">
+          📈 교과군별 등급 추이
+        </h3>
+
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b-2 border-blue-200 dark:border-blue-800">
+                <th className="text-left py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">과목군</th>
+                <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300">1-1</th>
+                <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300">1-2</th>
+                <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300">2-1</th>
+                <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300">2-2</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { name: "국어", grades: [4, 3, null, null] },
+                { name: "수학", grades: [4, 5, 5, 6] },
+                { name: "영어", grades: [3, 3, null, null] },
+                { name: "사회", grades: [3, 4, null, 6] },
+                { name: "과학", grades: [6, 5, 6, null] }
+              ].map((subject, idx) => (
+                <tr key={idx} className="border-b border-gray-100 dark:border-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/10 smooth-transition">
+                  <td className="py-4 px-4 font-bold text-gray-800 dark:text-gray-200">{subject.name}</td>
+                  {subject.grades.map((grade, i) => (
+                    <td key={i} className="py-4 px-4 text-center">
+                      {grade ? (
+                        <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold shadow-lg">
+                          {grade}
+                        </span>
+                      ) : (
+                        <span className="text-gray-300 dark:text-gray-600">—</span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* 진로선택 성취도 상세 팝업 */}
       {achPopupOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setAchPopupOpen(false)}>
