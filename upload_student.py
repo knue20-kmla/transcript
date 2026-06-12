@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-생기부 PDF를 students.json에 자동 추가하는 스크립트
+생기부 PDF를 students.json에 자동 추가하는 스크립트 (Solara 3 Pro API 버전)
 
 사용법:
     python upload_student.py <생기부.pdf>
@@ -9,24 +9,22 @@
     python upload_student.py 홍길동_생기부.pdf
 """
 
-import anthropic
+import requests
 import json
 import sys
 import os
 import base64
 from pathlib import Path
 
-# Claude API 키 (환경변수에서 가져오기)
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
+# Solara API 설정
+SOLARA_API_URL = "https://api.upstage.ai/v1/solar/chat/completions"
+SOLARA_API_KEY = os.environ.get("UPSTAGE_API_KEY")
 
-if not ANTHROPIC_API_KEY:
-    print("❌ 오류: ANTHROPIC_API_KEY 환경변수가 설정되지 않았습니다.")
+if not SOLARA_API_KEY:
+    print("❌ 오류: UPSTAGE_API_KEY 환경변수가 설정되지 않았습니다.")
     print("\n설정 방법:")
-    print("  export ANTHROPIC_API_KEY='your-api-key-here'")
+    print("  export UPSTAGE_API_KEY='your-api-key-here'")
     sys.exit(1)
-
-# Claude API 클라이언트 초기화
-client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
 # JSON 변환 프롬프트
 CONVERSION_PROMPT = """
@@ -129,27 +127,29 @@ def read_pdf_as_base64(pdf_path):
     with open(pdf_path, 'rb') as f:
         return base64.standard_b64encode(f.read()).decode('utf-8')
 
-def parse_pdf_with_claude(pdf_path):
-    """Claude API로 PDF 파싱"""
+def parse_pdf_with_solara(pdf_path):
+    """Solara 3 Pro API로 PDF 파싱"""
     print(f"📄 PDF 읽는 중: {pdf_path}")
 
     pdf_data = read_pdf_as_base64(pdf_path)
 
-    print("🤖 Claude API 호출 중... (30초-1분 소요)")
+    print("🤖 Solara 3 Pro API 호출 중... (30초-1분 소요)")
 
-    response = client.messages.create(
-        model="claude-3-5-sonnet-20241022",
-        max_tokens=16000,
-        messages=[
+    headers = {
+        "Authorization": f"Bearer {SOLARA_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model": "solar-pro",
+        "messages": [
             {
                 "role": "user",
                 "content": [
                     {
                         "type": "document",
-                        "source": {
-                            "type": "base64",
-                            "media_type": "application/pdf",
-                            "data": pdf_data
+                        "document": {
+                            "url": f"data:application/pdf;base64,{pdf_data}"
                         }
                     },
                     {
@@ -158,11 +158,20 @@ def parse_pdf_with_claude(pdf_path):
                     }
                 ]
             }
-        ]
-    )
+        ],
+        "max_tokens": 16000,
+        "temperature": 0.1
+    }
 
-    # 응답에서 JSON 추출
-    content = response.content[0].text
+    response = requests.post(SOLARA_API_URL, headers=headers, json=payload)
+
+    if response.status_code != 200:
+        print(f"❌ API 오류: {response.status_code}")
+        print(response.text)
+        sys.exit(1)
+
+    result = response.json()
+    content = result['choices'][0]['message']['content']
 
     # ```json ... ``` 형태로 온 경우 추출
     if "```json" in content:
@@ -219,7 +228,7 @@ def main():
 
     try:
         # 1. PDF 파싱
-        student_data = parse_pdf_with_claude(pdf_path)
+        student_data = parse_pdf_with_solara(pdf_path)
         print(f"✅ 파싱 완료: {student_data['이름']} 학생")
 
         # 2. JSON 업데이트

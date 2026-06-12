@@ -1,8 +1,14 @@
-# 📚 생기부 자동 업로드 시스템
+# 📚 생기부 자동 업로드 시스템 (Solara 3 Pro)
 
 ## 🎯 개요
 
-생기부 PDF를 업로드하면 Claude API가 자동으로 파싱하여 `students.json`에 추가하는 시스템입니다.
+생기부 PDF를 업로드하면 Solara 3 Pro API가 자동으로 파싱하여 `students.json`에 추가하는 시스템입니다.
+
+**특징:**
+- ✅ 한글 문서에 특화된 Solara 3 Pro 사용
+- ✅ 높은 정확도의 한글 텍스트 인식
+- ✅ 자동 JSON 변환
+- ✅ Git 자동 커밋
 
 ---
 
@@ -21,22 +27,22 @@ Python 3.7 이상 필요
 ### 2. 필수 패키지 설치
 
 ```bash
-pip3 install anthropic
+pip3 install requests
 ```
 
 ---
 
-### 3. Claude API 키 설정
+### 3. Upstage API 키 설정
 
 #### 방법 A: 환경변수 (추천)
 
 ```bash
-export ANTHROPIC_API_KEY='sk-ant-api03-...'
+export UPSTAGE_API_KEY='up_...'
 ```
 
 영구 설정 (macOS/Linux):
 ```bash
-echo 'export ANTHROPIC_API_KEY="sk-ant-api03-..."' >> ~/.zshrc
+echo 'export UPSTAGE_API_KEY="up_..."' >> ~/.zshrc
 source ~/.zshrc
 ```
 
@@ -44,7 +50,7 @@ source ~/.zshrc
 
 `upload_student.py` 파일 상단에 직접 입력:
 ```python
-ANTHROPIC_API_KEY = "sk-ant-api03-..."
+SOLARA_API_KEY = "up_..."
 ```
 
 ---
@@ -63,7 +69,7 @@ python3 upload_student.py 홍길동_생기부.pdf
 ```
 1. PDF 파일 읽기
    ↓
-2. Claude API로 분석 (30초-1분)
+2. Solara 3 Pro API로 분석 (30초-1분)
    ↓
 3. JSON 변환
    ↓
@@ -80,8 +86,8 @@ python3 upload_student.py 홍길동_생기부.pdf
 
 **업로드 전:**
 - [ ] Python 3.7+ 설치됨
-- [ ] `anthropic` 패키지 설치됨
-- [ ] Claude API 키 설정됨
+- [ ] `requests` 패키지 설치됨
+- [ ] Upstage API 키 설정됨
 - [ ] 생기부 PDF 준비됨
 
 **업로드 후:**
@@ -121,30 +127,31 @@ python3 upload_student.py 홍길동_생기부.pdf
 같은 이름의 학생이 이미 있으면 덮어쓰기 여부를 묻습니다.
 
 ### 2. API 비용
-- Claude 3.5 Sonnet: $3 / 1M input tokens
-- 생기부 1개: 약 $0.10-0.30
-- 10명 = 약 $3
+Solara 3 Pro API 비용은 Upstage 공식 가격 정책을 참고하세요.
+- 생기부 1개: 약 $0.10-0.30 (예상)
+- 매우 경제적!
 
 ### 3. 변환 정확도
 - 첫 실행 후 `students.json` 확인 필수
 - 오류 발견 시 수동 수정 필요
+- Solara 3 Pro는 한글 문서에 최적화되어 있어 높은 정확도 제공
 
 ---
 
 ## 🐛 문제 해결
 
-### 오류: "ANTHROPIC_API_KEY가 설정되지 않았습니다"
+### 오류: "UPSTAGE_API_KEY가 설정되지 않았습니다"
 
 **해결:**
 ```bash
-export ANTHROPIC_API_KEY='your-api-key-here'
+export UPSTAGE_API_KEY='up_...'
 ```
 
-### 오류: "anthropic 모듈을 찾을 수 없습니다"
+### 오류: "requests 모듈을 찾을 수 없습니다"
 
 **해결:**
 ```bash
-pip3 install anthropic
+pip3 install requests
 ```
 
 ### 오류: "파일을 찾을 수 없습니다"
@@ -154,6 +161,13 @@ pip3 install anthropic
 # 절대 경로 사용
 python3 upload_student.py ~/Downloads/생기부.pdf
 ```
+
+### API 오류 (400, 401, 500 등)
+
+**해결:**
+1. API 키 확인: `echo $UPSTAGE_API_KEY`
+2. API 키가 올바른지 확인
+3. Upstage 콘솔에서 사용량 확인
 
 ### JSON 형식이 이상함
 
@@ -188,12 +202,23 @@ python3 upload_student.py 생기부.pdf > upload.log 2>&1
 
 ---
 
+## 💰 비용
+
+Solara 3 Pro API 비용은 Upstage 공식 가격 정책을 참고하세요.
+
+**예상:**
+- 생기부 1개: 약 $0.10-0.30
+- 매우 경제적!
+
+---
+
 ## 📞 문의
 
 문제가 발생하면:
 1. `upload.log` 확인
-2. GitHub Issues에 문의
-3. 수동으로 JSON 편집
+2. API 키 재확인
+3. GitHub Issues에 문의
+4. 수동으로 JSON 편집
 
 ---
 
