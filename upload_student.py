@@ -203,7 +203,7 @@ def parse_pdf_with_solara(pdf_path):
                 "content": f"{CONVERSION_PROMPT}\n\n===== 생기부 텍스트 =====\n{extracted_text}"
             }
         ],
-        "max_tokens": 50000,  # 충분히 큰 값으로 증가
+        "max_tokens": 30000,  # 적절한 크기로 조정
         "temperature": 0.1
     }
 

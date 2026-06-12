@@ -91,7 +91,7 @@ with tab1:
                             [sys.executable, "upload_student.py", str(temp_path)],
                             capture_output=True,
                             text=True,
-                            timeout=180  # 3분 타임아웃
+                            timeout=600  # 10분 타임아웃으로 증가
                         )
 
                         if result.returncode == 0:
