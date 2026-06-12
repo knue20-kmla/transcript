@@ -777,6 +777,169 @@ const Career = ({ student }) => {
   );
 };
 
+// 동아리활동 탭
+const Club = ({ student }) => {
+  const [filterYear, setFilterYear] = useState("전체");
+
+  const 동아리활동 = student.동아리활동 || [];
+
+  const filtered = filterYear === "전체"
+    ? 동아리활동
+    : 동아리활동.filter(item => item.학년 === filterYear);
+
+  const highlightKeywords = [
+    '매우', '탁월한', '뛰어난', '우수한', '훌륭한', '인상적', '적극적', '주도적', '성실하게',
+    '높은 수준', '깊이 있는', '체계적', '논리적', '진지하고', '능숙하게', '책임감',
+    '대표', '발표', '토론', '분석', '탐구', '기여', '진취적'
+  ];
+
+  const highlightText = (text) => {
+    if (!text) return text;
+    let result = text;
+    highlightKeywords.forEach(keyword => {
+      const regex = new RegExp(`(${keyword})`, 'g');
+      result = result.replace(regex, '<mark class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 font-bold px-1 rounded">$1</mark>');
+    });
+    return result;
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="glass rounded-3xl p-4">
+        <div className="flex gap-2">
+          {["전체", "1학년", "2학년"].map(year => (
+            <button
+              key={year}
+              onClick={() => setFilterYear(year)}
+              className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
+                filterYear === year
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              {year}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {filtered.length > 0 ? (
+        <div className="space-y-4">
+          {filtered.map((item, i) => (
+            <div key={i} className="glass rounded-3xl p-8">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="text-xl font-bold gradient-text mb-2">{item.동아리명}</h3>
+                  <div className="flex gap-2">
+                    <span className="px-3 py-1 bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200 text-xs font-bold rounded-full">
+                      {item.학년} {item.학기}
+                    </span>
+                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 text-xs font-bold rounded-full">
+                      {item.시간}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: highlightText(item.내용) }}
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="glass rounded-3xl p-8 text-center text-gray-400">
+          선택한 학년의 동아리활동 기록이 없습니다.
+        </div>
+      )}
+    </div>
+  );
+};
+
+// 자율활동 탭
+const Autonomous = ({ student }) => {
+  const 자율활동 = student.자율활동 || [];
+
+  const highlightKeywords = [
+    '성실히', '충실히', '적극적', '최선을 다해', '인상적', '성공적',
+    '전교', '사법위원장', '책임감', '리더십', '공동체'
+  ];
+
+  const highlightText = (text) => {
+    if (!text) return text;
+    let result = text;
+    highlightKeywords.forEach(keyword => {
+      const regex = new RegExp(`(${keyword})`, 'g');
+      result = result.replace(regex, '<mark class="bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400 font-bold px-1 rounded">$1</mark>');
+    });
+    return result;
+  };
+
+  return (
+    <div className="space-y-6">
+      {자율활동.length > 0 ? (
+        자율활동.map((item, i) => (
+          <div key={i} className="glass rounded-3xl p-8">
+            <h3 className="text-xl font-bold gradient-text mb-6 flex items-center gap-2">
+              🌟 {item.학년} 자율활동 특기사항
+            </h3>
+            <div
+              className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: highlightText(item.내용) }}
+            />
+          </div>
+        ))
+      ) : (
+        <div className="glass rounded-3xl p-8 text-center text-gray-400">
+          자율활동 기록이 없습니다.
+        </div>
+      )}
+    </div>
+  );
+};
+
+// 행동특성 및 종합의견 탭
+const Behavior = ({ student }) => {
+  const 행동특성 = student.행동특성 || [];
+
+  const highlightKeywords = [
+    '노블레스 오블리주', '국제기구', '뛰어남', '인상적', '성실하게', '책임',
+    '차분하고', '성숙한', '신뢰', '안정감', '일관되게', '공동체', '가치'
+  ];
+
+  const highlightText = (text) => {
+    if (!text) return text;
+    let result = text;
+    highlightKeywords.forEach(keyword => {
+      const regex = new RegExp(`(${keyword})`, 'g');
+      result = result.replace(regex, '<mark class="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 font-bold px-1 rounded">$1</mark>');
+    });
+    return result;
+  };
+
+  return (
+    <div className="space-y-6">
+      {행동특성.length > 0 ? (
+        행동특성.map((item, i) => (
+          <div key={i} className="glass rounded-3xl p-8">
+            <h3 className="text-xl font-bold gradient-text mb-6 flex items-center gap-2">
+              📋 {item.학년} 행동특성 및 종합의견
+            </h3>
+            <div
+              className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: highlightText(item.내용) }}
+            />
+          </div>
+        ))
+      ) : (
+        <div className="glass rounded-3xl p-8 text-center text-gray-400">
+          행동특성 기록이 없습니다.
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ==================== 메인 앱 ====================
 function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -813,6 +976,9 @@ function App() {
     { id: 'grades', name: '성적', icon: 'chart' },
     { id: 'seteuk', name: '세특', icon: 'book' },
     { id: 'career', name: '진로활동', icon: 'user' },
+    { id: 'club', name: '동아리', icon: 'user' },
+    { id: 'autonomous', name: '자율활동', icon: 'user' },
+    { id: 'behavior', name: '행특', icon: 'user' },
   ];
 
   if (loading) {
@@ -934,6 +1100,9 @@ function App() {
               {activeTab === 'grades' && <Grades student={currentStudent} />}
               {activeTab === 'seteuk' && <Seteuk studentName={selectedStudent} subject={seSubject} setSubject={setSeSubject} student={currentStudent} />}
               {activeTab === 'career' && <Career student={currentStudent} />}
+              {activeTab === 'club' && <Club student={currentStudent} />}
+              {activeTab === 'autonomous' && <Autonomous student={currentStudent} />}
+              {activeTab === 'behavior' && <Behavior student={currentStudent} />}
             </div>
           </div>
         </div>
