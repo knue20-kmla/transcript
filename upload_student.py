@@ -13,14 +13,14 @@ import requests
 import json
 import sys
 import os
-import base64
 from pathlib import Path
 
-# Solara API 설정
+# Upstage API 설정
+DOCUMENT_PARSE_URL = "https://api.upstage.ai/v1/document-ai/document-parse"
 SOLARA_API_URL = "https://api.upstage.ai/v1/solar/chat/completions"
-SOLARA_API_KEY = os.environ.get("UPSTAGE_API_KEY")
+UPSTAGE_API_KEY = os.environ.get("UPSTAGE_API_KEY")
 
-if not SOLARA_API_KEY:
+if not UPSTAGE_API_KEY:
     print("❌ 오류: UPSTAGE_API_KEY 환경변수가 설정되지 않았습니다.")
     print("\n설정 방법:")
     print("  export UPSTAGE_API_KEY='your-api-key-here'")
@@ -124,40 +124,70 @@ CONVERSION_PROMPT = """
 
 def read_pdf_as_base64(pdf_path):
     """PDF 파일을 base64로 인코딩"""
+    import base64
     with open(pdf_path, 'rb') as f:
         return base64.standard_b64encode(f.read()).decode('utf-8')
 
+def extract_text_from_pdf(pdf_path):
+    """Document Parse API로 PDF에서 텍스트 추출"""
+    print(f"📄 PDF 텍스트 추출 중...")
+
+    headers = {
+        "Authorization": f"Bearer {UPSTAGE_API_KEY}"
+    }
+
+    with open(pdf_path, 'rb') as f:
+        files = {"document": f}
+        data = {"ocr": "force"}  # OCR 강제 적용
+
+        response = requests.post(
+            DOCUMENT_PARSE_URL,
+            headers=headers,
+            files=files,
+            data=data
+        )
+
+    if response.status_code != 200:
+        print(f"❌ Document Parse API 오류: {response.status_code}")
+        print(response.text)
+        sys.exit(1)
+
+    result = response.json()
+
+    # 텍스트 추출
+    if "content" in result and "text" in result["content"]:
+        extracted_text = result["content"]["text"]
+    elif "text" in result:
+        extracted_text = result["text"]
+    else:
+        print("❌ 텍스트를 추출할 수 없습니다.")
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        sys.exit(1)
+
+    print(f"✅ 텍스트 추출 완료 ({len(extracted_text)} 글자)")
+    return extracted_text
+
 def parse_pdf_with_solara(pdf_path):
-    """Solara 3 Pro API로 PDF 파싱"""
+    """Solara 3 Pro API로 PDF 파싱 (2단계)"""
     print(f"📄 PDF 읽는 중: {pdf_path}")
 
-    pdf_data = read_pdf_as_base64(pdf_path)
+    # 1단계: PDF → 텍스트
+    extracted_text = extract_text_from_pdf(pdf_path)
 
+    # 2단계: 텍스트 → JSON
     print("🤖 Solara 3 Pro API 호출 중... (30초-1분 소요)")
 
     headers = {
-        "Authorization": f"Bearer {SOLARA_API_KEY}",
+        "Authorization": f"Bearer {UPSTAGE_API_KEY}",
         "Content-Type": "application/json"
     }
 
-    # Solara API는 image_url 형식으로 PDF를 받음
     payload = {
         "model": "solar-pro",
         "messages": [
             {
                 "role": "user",
-                "content": [
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:application/pdf;base64,{pdf_data}"
-                        }
-                    },
-                    {
-                        "type": "text",
-                        "text": CONVERSION_PROMPT
-                    }
-                ]
+                "content": f"{CONVERSION_PROMPT}\n\n===== 생기부 텍스트 =====\n{extracted_text}"
             }
         ],
         "max_tokens": 16000,
@@ -167,7 +197,7 @@ def parse_pdf_with_solara(pdf_path):
     response = requests.post(SOLARA_API_URL, headers=headers, json=payload)
 
     if response.status_code != 200:
-        print(f"❌ API 오류: {response.status_code}")
+        print(f"❌ Solar API 오류: {response.status_code}")
         print(response.text)
         sys.exit(1)
 
