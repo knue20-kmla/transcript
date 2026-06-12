@@ -30,11 +30,12 @@ if not UPSTAGE_API_KEY:
 CONVERSION_PROMPT = """
 생기부 PDF를 분석하여 다음 JSON 형식으로 정확하게 변환해주세요.
 
-**중요:**
-- 모든 필드를 빠짐없이 채워주세요
-- 성적은 학년/학기별로 정확히 분류
-- 세특은 과목별로 상세히 추출
-- 진로활동, 동아리, 자율활동, 행동특성도 포함
+**🚨 매우 중요 - 반드시 지켜주세요:**
+1. 세부능력 및 특기사항은 **단 한 글자도 빠뜨리지 말고** 전체를 완벽하게 복사해주세요
+2. 행동특성 및 종합의견도 **전체 내용을 모두** 포함해주세요
+3. 각 과목의 세특은 처음부터 끝까지 **완전한 문장** 전체를 추출해주세요
+4. 절대로 요약하거나 생략하지 마세요 - 원문 그대로 전부 추출
+5. "..." 같은 생략 표시를 사용하지 마세요
 
 **JSON 형식:**
 ```json
@@ -154,14 +155,26 @@ def extract_text_from_pdf(pdf_path):
 
     result = response.json()
 
-    # 텍스트 추출
-    if "content" in result and "text" in result["content"]:
-        extracted_text = result["content"]["text"]
-    elif "text" in result:
-        extracted_text = result["text"]
-    else:
-        print("❌ 텍스트를 추출할 수 없습니다.")
-        print(json.dumps(result, indent=2, ensure_ascii=False))
+    # HTML에서 텍스트 추출
+    extracted_text = ""
+
+    if "content" in result and "html" in result["content"]:
+        # HTML 태그 제거하고 텍스트만 추출
+        import re
+        html_content = result["content"]["html"]
+        # HTML 태그 제거
+        extracted_text = re.sub(r'<[^>]+>', '\n', html_content)
+        # 연속된 줄바꿈을 하나로
+        extracted_text = re.sub(r'\n+', '\n', extracted_text)
+        # 앞뒤 공백 제거
+        extracted_text = extracted_text.strip()
+
+    if not extracted_text or len(extracted_text) < 100:
+        print("❌ 텍스트를 충분히 추출할 수 없습니다.")
+        print(f"추출된 텍스트 길이: {len(extracted_text)}")
+        print("HTML 내용 샘플:")
+        if "content" in result and "html" in result["content"]:
+            print(result["content"]["html"][:500])
         sys.exit(1)
 
     print(f"✅ 텍스트 추출 완료 ({len(extracted_text)} 글자)")
@@ -190,7 +203,7 @@ def parse_pdf_with_solara(pdf_path):
                 "content": f"{CONVERSION_PROMPT}\n\n===== 생기부 텍스트 =====\n{extracted_text}"
             }
         ],
-        "max_tokens": 16000,
+        "max_tokens": 50000,  # 충분히 큰 값으로 증가
         "temperature": 0.1
     }
 

@@ -8,60 +8,54 @@
 - ✅ 한글 문서에 특화된 Solara 3 Pro 사용
 - ✅ 높은 정확도의 한글 텍스트 인식
 - ✅ 자동 JSON 변환
+- ✅ 웹 관리자 화면 (드래그 앤 드롭)
 - ✅ Git 자동 커밋
 
 ---
 
-## 🚀 빠른 시작
+## 🚀 빠른 시작 (웹 관리자 - 추천!)
 
-### 1. Python 설치 확인
-
+### 1. 패키지 설치
 ```bash
-python3 --version
+pip3 install streamlit pandas requests
 ```
 
-Python 3.7 이상 필요
-
----
-
-### 2. 필수 패키지 설치
-
-```bash
-pip3 install requests
-```
-
----
-
-### 3. Upstage API 키 설정
-
-#### 방법 A: 환경변수 (추천)
-
+### 2. API 키 설정
 ```bash
 export UPSTAGE_API_KEY='up_...'
-```
 
-영구 설정 (macOS/Linux):
-```bash
+# 영구 설정
 echo 'export UPSTAGE_API_KEY="up_..."' >> ~/.zshrc
 source ~/.zshrc
 ```
 
-#### 방법 B: 스크립트 수정
-
-`upload_student.py` 파일 상단에 직접 입력:
-```python
-SOLARA_API_KEY = "up_..."
+### 3. 관리자 화면 실행
+```bash
+cd ~/Desktop/생기부-시스템
+streamlit run admin.py
 ```
+
+### 4. 브라우저 열기
+자동으로 열리거나 직접 접속:
+```
+http://localhost:8501
+```
+
+### 5. PDF 업로드
+1. 📤 업로드 탭 선택
+2. PDF 파일 **드래그 앤 드롭** 또는 찾아보기
+3. 🚀 업로드 시작 클릭
+4. 완료!
 
 ---
 
-## 📖 사용법
+## 💻 CLI 사용 (고급)
 
-### 기본 사용
+커맨드라인에서 직접 실행하려면:
 
 ```bash
 cd ~/Desktop/생기부-시스템
-python3 upload_student.py 홍길동_생기부.pdf
+python3 upload_student.py 생기부.pdf
 ```
 
 ### 실행 흐름
