@@ -277,52 +277,6 @@ const Dashboard = ({ student }) => {
         </div>
       </div>
 
-      {/* 교과군별 등급 추이 */}
-      <div className="glass rounded-3xl p-8">
-        <h3 className="text-2xl font-bold mb-6 gradient-text flex items-center gap-2">
-          <Icon name="chart" size={24} className="text-blue-500" />
-          교과군별 등급 추이
-        </h3>
-
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b-2 border-blue-200 dark:border-blue-800">
-                <th className="text-left py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">과목군</th>
-                <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300">1-1</th>
-                <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300">1-2</th>
-                <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300">2-1</th>
-                <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300">2-2</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { name: "국어", grades: [4, 3, null, null] },
-                { name: "수학", grades: [4, 5, 5, 6] },
-                { name: "영어", grades: [3, 3, null, null] },
-                { name: "사회", grades: [3, 4, null, 6] },
-                { name: "과학", grades: [6, 5, 6, null] }
-              ].map((subject, idx) => (
-                <tr key={idx} className="border-b border-gray-100 dark:border-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/10 smooth-transition">
-                  <td className="py-4 px-4 font-bold text-gray-800 dark:text-gray-200">{subject.name}</td>
-                  {subject.grades.map((grade, i) => (
-                    <td key={i} className="py-4 px-4 text-center">
-                      {grade ? (
-                        <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold shadow-lg">
-                          {grade}
-                        </span>
-                      ) : (
-                        <span className="text-gray-300 dark:text-gray-600">—</span>
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
       {/* 진로선택 성취도 상세 팝업 */}
       {achPopupOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setAchPopupOpen(false)}>
@@ -330,7 +284,7 @@ const Dashboard = ({ student }) => {
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-black gradient-text">진로선택 성취도 과목 상세</h3>
               <button onClick={() => setAchPopupOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
-                <Icon name="chevronDown" size={20} className="text-gray-500 transform rotate-180" />
+                ✕
               </button>
             </div>
 
@@ -348,11 +302,9 @@ const Dashboard = ({ student }) => {
                         <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{subj.학년} {subj.학기}</div>
                         <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">{subj.과목}</h4>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-bold shadow-lg text-lg">
-                          {subj.성취도}
-                        </span>
-                      </div>
+                      <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-bold shadow-lg text-lg">
+                        {subj.성취도}
+                      </span>
                     </div>
 
                     <div className="grid grid-cols-3 gap-4 mb-3">
