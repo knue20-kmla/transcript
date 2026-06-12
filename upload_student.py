@@ -140,6 +140,7 @@ def parse_pdf_with_solara(pdf_path):
         "Content-Type": "application/json"
     }
 
+    # Solara API는 image_url 형식으로 PDF를 받음
     payload = {
         "model": "solar-pro",
         "messages": [
@@ -147,8 +148,8 @@ def parse_pdf_with_solara(pdf_path):
                 "role": "user",
                 "content": [
                     {
-                        "type": "document",
-                        "document": {
+                        "type": "image_url",
+                        "image_url": {
                             "url": f"data:application/pdf;base64,{pdf_data}"
                         }
                     },
