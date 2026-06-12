@@ -249,6 +249,17 @@ const Dashboard = ({ student }) => {
 
   const achCount = achSubjects.length;
 
+  const achBreakdown = useMemo(() => {
+    const counts = { A: 0, B: 0, C: 0 };
+    achSubjects.forEach(subj => {
+      const grade = subj.성취도?.toUpperCase();
+      if (grade === 'A') counts.A++;
+      else if (grade === 'B') counts.B++;
+      else if (grade === 'C') counts.C++;
+    });
+    return counts;
+  }, [achSubjects]);
+
   return (
     <div className="space-y-6">
       {/* 통계 카드 */}
@@ -269,11 +280,28 @@ const Dashboard = ({ student }) => {
             <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">성취도 과목</h3>
             <Icon name="book" size={24} className="text-blue-500" />
           </div>
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-baseline gap-2 mb-3">
             <span className="text-5xl font-black gradient-text">{achCount}</span>
             <span className="text-lg text-gray-400">과목</span>
           </div>
-          <p className="text-xs text-gray-400 mt-2">클릭하여 상세 보기</p>
+          <div className="flex gap-2 flex-wrap">
+            {achBreakdown.A > 0 && (
+              <span className="text-xs font-bold px-2 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+                A {achBreakdown.A}개
+              </span>
+            )}
+            {achBreakdown.B > 0 && (
+              <span className="text-xs font-bold px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                B {achBreakdown.B}개
+              </span>
+            )}
+            {achBreakdown.C > 0 && (
+              <span className="text-xs font-bold px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+                C {achBreakdown.C}개
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-gray-400 mt-3">클릭하여 상세 보기</p>
         </div>
       </div>
 
