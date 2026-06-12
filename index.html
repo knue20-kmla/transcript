@@ -672,6 +672,32 @@ const Career = ({ student }) => {
     ? 진로활동.창체진로
     : 진로활동.창체진로.filter(item => item.학년 === filterYear);
 
+  // 하이라이트할 키워드들
+  const highlightKeywords = [
+    // 강한 평가 표현
+    '매우', '탁월한', '뛰어난', '우수한', '훌륭한', '인상적', '적극적', '주도적', '성실하게',
+    '높은 수준', '깊이 있는', '체계적', '논리적', '창의적',
+    // 전문 역량
+    '국제기구', '유엔', 'SDGs', '지속가능발전', '글로벌 시민성', '리더십',
+    '금융', '벤처투자', '국제 정세', '정책 환경',
+    '외교교육', '대중연설', '구조화', '분석', '탐구',
+    // 주요 활동
+    '진로탐방', '박람회', '특강', '프로그램', '토론', '발표',
+    '보편적 참여', '절차적 정당성', '강대국 견제',
+  ];
+
+  const highlightText = (text) => {
+    if (!text) return text;
+
+    let result = text;
+    highlightKeywords.forEach(keyword => {
+      const regex = new RegExp(`(${keyword})`, 'g');
+      result = result.replace(regex, '<mark class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold px-1 rounded">$1</mark>');
+    });
+
+    return result;
+  };
+
   return (
     <div className="space-y-6">
       {/* 필터 */}
@@ -707,9 +733,10 @@ const Career = ({ student }) => {
                     {item.학년} {item.학기}
                   </span>
                 </div>
-                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                  {item.내용}
-                </p>
+                <div
+                  className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap"
+                  dangerouslySetInnerHTML={{ __html: highlightText(item.내용) }}
+                />
               </div>
             ))}
           </div>
@@ -730,9 +757,10 @@ const Career = ({ student }) => {
                     {item.학년} {item.학기}
                   </span>
                 </div>
-                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                  {item.내용}
-                </p>
+                <div
+                  className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap"
+                  dangerouslySetInnerHTML={{ __html: highlightText(item.내용) }}
+                />
               </div>
             ))}
           </div>
