@@ -608,13 +608,13 @@ function App() {
             </div>
 
             {/* 주요 세특 평가 표현 */}
-            {studentData.highlights && studentData.highlights.length > 0 && (
+            {currentStudent.highlights && currentStudent.highlights.length > 0 && (
               <div className="glass rounded-3xl p-6 mt-6">
                 <h3 className="text-sm font-bold mb-4 gradient-text flex items-center gap-2">
                   <span>⭐</span> 주요 세특 평가 표현
                 </h3>
                 <div className="space-y-3">
-                  {studentData.highlights.map((h, i) => (
+                  {currentStudent.highlights.map((h, i) => (
                     <div key={i} className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-4 border-l-4 border-blue-500">
                       <p className="text-gray-800 dark:text-gray-200 font-semibold text-xs mb-2 leading-relaxed">"{h.text}"</p>
                       <span className="inline-block px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 text-[10px] font-bold rounded-full">
