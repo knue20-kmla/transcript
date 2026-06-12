@@ -229,6 +229,8 @@ const Icon = ({ name, size = 20, className = "" }) => {
 
 // 대시보드 탭
 const Dashboard = ({ student }) => {
+  const [achPopupOpen, setAchPopupOpen] = useState(false);
+
   const avgGrade = useMemo(() => {
     if (!student.성적 || student.성적.length === 0) return "—";
     let totalScore = 0, totalCredits = 0;
@@ -241,7 +243,11 @@ const Dashboard = ({ student }) => {
     return totalCredits > 0 ? (totalScore / totalCredits).toFixed(2) : "—";
   }, [student]);
 
-  const achCount = student.성적?.filter(g => g.성취도).length || 0;
+  const achSubjects = useMemo(() => {
+    return (student.성적 || []).filter(g => g.성취도);
+  }, [student]);
+
+  const achCount = achSubjects.length;
 
   return (
     <div className="space-y-6">
@@ -258,7 +264,7 @@ const Dashboard = ({ student }) => {
           </div>
         </div>
 
-        <div className="glass rounded-3xl p-8 hover-lift smooth-transition">
+        <div className="glass rounded-3xl p-8 hover-lift smooth-transition cursor-pointer" onClick={() => setAchPopupOpen(true)}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">성취도 과목</h3>
             <Icon name="book" size={24} className="text-blue-500" />
@@ -267,6 +273,7 @@ const Dashboard = ({ student }) => {
             <span className="text-5xl font-black gradient-text">{achCount}</span>
             <span className="text-lg text-gray-400">과목</span>
           </div>
+          <p className="text-xs text-gray-400 mt-2">클릭하여 상세 보기</p>
         </div>
       </div>
 
@@ -285,6 +292,70 @@ const Dashboard = ({ student }) => {
                 </span>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* 진로선택 성취도 상세 팝업 */}
+      {achPopupOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setAchPopupOpen(false)}>
+          <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-black gradient-text">진로선택 성취도 과목 상세</h3>
+              <button onClick={() => setAchPopupOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
+                <Icon name="chevronDown" size={20} className="text-gray-500 transform rotate-180" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {achSubjects.length > 0 ? achSubjects.map((subj, idx) => {
+                const score = parseFloat(subj.원점수);
+                const avg = parseFloat(subj.평균);
+                const isAboveAvg = !isNaN(score) && !isNaN(avg) && score >= avg;
+                const diff = !isNaN(score) && !isNaN(avg) ? Math.abs(score - avg).toFixed(1) : null;
+
+                return (
+                  <div key={idx} className="p-5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{subj.학년} {subj.학기}</div>
+                        <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">{subj.과목}</h4>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-bold shadow-lg text-lg">
+                          {subj.성취도}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4 mb-3">
+                      <div className="text-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">원점수</div>
+                        <div className="text-xl font-black text-gray-900 dark:text-gray-100">{subj.원점수 || '—'}</div>
+                      </div>
+                      <div className="text-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">과목평균</div>
+                        <div className="text-xl font-black text-gray-600 dark:text-gray-300">{subj.평균 || '—'}</div>
+                      </div>
+                      <div className="text-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">학점</div>
+                        <div className="text-xl font-black text-gray-900 dark:text-gray-100">{subj.학점 || 3}</div>
+                      </div>
+                    </div>
+
+                    {diff && (
+                      <div className={`text-center p-3 rounded-lg ${isAboveAvg ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800' : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'}`}>
+                        <span className={`text-sm font-bold ${isAboveAvg ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                          {isAboveAvg ? '▲' : '▼'} {diff}점 ({isAboveAvg ? '평균 이상' : '평균 이하'})
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              }) : (
+                <div className="text-center py-12 text-gray-400">성취도 과목 데이터가 없습니다.</div>
+              )}
+            </div>
           </div>
         </div>
       )}
