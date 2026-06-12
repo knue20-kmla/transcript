@@ -574,7 +574,9 @@ const Seteuk = ({ studentName, subject, setSubject, student }) => {
 
   const sections = useMemo(() => {
     if (!mdContent) return [];
-    return mdContent.split(/\n## /).filter(s => s.trim()).map(s => {
+    // ## 로 split (첫 번째 # 제목 제거)
+    const parts = mdContent.split(/^## /m).filter(s => s.trim());
+    return parts.map(s => {
       const lines = s.split('\n');
       return { title: lines[0].replace(/^# /, ''), content: lines.slice(1).join('\n') };
     });
