@@ -545,41 +545,66 @@ const Seteuk = ({ studentName, subject, setSubject, student }) => {
 
     setLoading(true);
 
-    // 1. 먼저 JSON 데이터에서 세특 찾기
-    const grades = student.성적 || [];
-    const subjectSeteuk = grades
-      .filter(g => g.과목 && g.과목.includes(subject) && g.세특)
-      .map(g => `## ${g.학년} ${g.학기}\n\n${g.세특}`)
-      .join('\n\n');
+    // 마크다운 파일을 먼저 시도
+    fetch(`${GITHUB_BASE}${studentName}_세특_${subject}.md`)
+      .then(res => {
+        if (!res.ok) throw new Error('마크다운 파일 없음');
+        return res.text();
+      })
+      .then(text => {
+        setMdContent(text);
+        setLoading(false);
+      })
+      .catch(err => {
+        // 마크다운 파일이 없으면 JSON 데이터에서 세특 찾기
+        console.log('마크다운 파일 없음, JSON 사용:', err);
+        const grades = student.성적 || [];
+        const subjectSeteuk = grades
+          .filter(g => g.과목 && g.과목.includes(subject) && g.세특)
+          .map(g => `## ${g.학년} ${g.학기}\n\n${g.세특}`)
+          .join('\n\n');
 
-    if (subjectSeteuk) {
-      // JSON에 세특이 있으면 사용
-      setMdContent(`# ${subject}\n\n${subjectSeteuk}`);
-      setLoading(false);
-    } else {
-      // JSON에 없으면 마크다운 파일 시도
-      fetch(`${GITHUB_BASE}${studentName}_세특_${subject}.md`)
-        .then(res => res.text())
-        .then(text => {
-          setMdContent(text);
-          setLoading(false);
-        })
-        .catch(err => {
-          console.error(err);
+        if (subjectSeteuk) {
+          setMdContent(`# ${subject}\n\n${subjectSeteuk}`);
+        } else {
           setMdContent('# 데이터를 불러올 수 없습니다.');
-          setLoading(false);
-        });
-    }
+        }
+        setLoading(false);
+      });
   }, [studentName, subject, student]);
 
   const sections = useMemo(() => {
     if (!mdContent) return [];
-    // ## 로 split (첫 번째 # 제목 제거)
-    const parts = mdContent.split(/^## /m).filter(s => s.trim());
-    return parts.map(s => {
-      const lines = s.split('\n');
-      return { title: lines[0].replace(/^# /, ''), content: lines.slice(1).join('\n') };
+
+    // marked.js로 HTML 변환
+    const html = marked.parse(mdContent);
+
+    // HTML을 DOM으로 파싱
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    // h2 태그로 섹션 구분
+    const h2Tags = doc.querySelectorAll('h2');
+    const result = [];
+
+    h2Tags.forEach(h2 => {
+      const title = h2.textContent;
+      const contentParts = [];
+      let nextElement = h2.nextElementSibling;
+
+      // 다음 h2가 나올 때까지 모든 내용 수집
+      while (nextElement && nextElement.tagName !== 'H2') {
+        contentParts.push(nextElement.outerHTML);
+        nextElement = nextElement.nextElementSibling;
+      }
+
+      result.push({
+        title: title,
+        content: contentParts.join('')
+      });
     });
+
+    return result;
   }, [mdContent]);
 
   const 세특분석 = student.세특종합분석 || {};
@@ -655,7 +680,7 @@ const Seteuk = ({ studentName, subject, setSubject, student }) => {
         </div>
       ) : sections.length > 0 ? (
         <div className="space-y-4">
-          {sections.slice(1).map((sec, idx) => (
+          {sections.map((sec, idx) => (
             <div key={idx} className="glass rounded-2xl overflow-hidden">
               <button onClick={() => setOpenSections(prev => ({ ...prev, [idx]: !prev[idx] }))}
                 className="w-full p-5 flex items-center justify-between hover:bg-blue-50 dark:hover:bg-blue-900/20 smooth-transition">
@@ -663,7 +688,7 @@ const Seteuk = ({ studentName, subject, setSubject, student }) => {
                 <Icon name="chevronDown" className={`text-gray-400 smooth-transition ${openSections[idx] ? 'rotate-180' : ''}`} />
               </button>
               <div className={`accordion-content ${openSections[idx] ? 'open' : ''}`}>
-                <div className="p-6 markdown" dangerouslySetInnerHTML={{ __html: marked.parse(sec.content) }} />
+                <div className="p-6 markdown prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: sec.content }} />
               </div>
             </div>
           ))}
