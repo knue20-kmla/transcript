@@ -13,9 +13,6 @@
   <!-- Marked.js (마크다운 렌더링) -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-  <!-- PapaParse (CSV 파싱) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -110,9 +107,8 @@
 const { useState, useEffect, useMemo } = React;
 
 // ==================== 설정 ====================
-const GOOGLE_SHEETS_BASE = 'https://docs.google.com/spreadsheets/d/';
-const SHEET_ID = '10x7vkogOxuUiYcy62PAtHgZHCu4roQAi6LKRavchrJ8'; // 구글 시트 ID
-const GITHUB_BASE = 'https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/markdown/'; // 마크다운 파일 경로 (GitHub 저장소 만든 후 수정)
+const DATA_BASE = 'https://raw.githubusercontent.com/knue20-kmla/transcript/main/data/'; // JSON 데이터 경로
+const GITHUB_BASE = 'https://raw.githubusercontent.com/knue20-kmla/transcript/main/markdown/'; // 마크다운 파일 경로
 
 // ==================== 아이콘 컴포넌트 ====================
 const Ic = ({ name, size=18, cls="" }) => {
@@ -374,51 +370,33 @@ function App() {
 
   // 데이터
   const [students, setStudents] = useState([]);
-  const [gradesData, setGradesData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // 세특 탭
   const [seSubject, setSeSubject] = useState("전체 분석");
 
   useEffect(() => {
-    // 구글 시트 데이터 로드 (CSV export 형식)
-    // 실제 사용 시 SHEET_ID를 입력하고 "웹에 게시" 설정 필요
-    Promise.all([
-      fetch(`${GOOGLE_SHEETS_BASE}${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=학생_기본정보`).then(r => r.text()),
-      fetch(`${GOOGLE_SHEETS_BASE}${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=성적_등급과목`).then(r => r.text()),
-      fetch(`${GOOGLE_SHEETS_BASE}${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=성적_성취도과목`).then(r => r.text()),
-    ])
-    .then(([studentsCSV, gradesCSV, achCSV]) => {
-      const studentsParsed = Papa.parse(studentsCSV, { header: true }).data;
-      const gradesParsed = Papa.parse(gradesCSV, { header: true }).data;
-      const achParsed = Papa.parse(achCSV, { header: true }).data;
-
-      setStudents(studentsParsed);
-      setGradesData([...gradesParsed, ...achParsed]);
-      setLoading(false);
-    })
-    .catch(err => {
-      console.error(err);
-      setLoading(false);
-    });
+    // JSON 데이터 로드
+    fetch(`${DATA_BASE}students.json`)
+      .then(res => res.json())
+      .then(data => {
+        setStudents(data.students);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('데이터 로드 실패:', err);
+        setLoading(false);
+      });
   }, []);
 
   const currentStudent = useMemo(() => {
     return students.find(s => s.이름 === selectedStudent) || {};
   }, [students, selectedStudent]);
 
-  const currentGrades = useMemo(() => {
-    return gradesData.filter(g => g.학생명 === selectedStudent);
-  }, [gradesData, selectedStudent]);
-
   const studentData = {
     ...currentStudent,
-    grades: currentGrades,
-    highlights: [
-      { text: "한차원 더 깊은 사고를 하는 모습", subject: "국어" },
-      { text: "입체적으로 분석하고 추적하는 능력이 뛰어남", subject: "언어와 매체" },
-      { text: "탁월한 학술적 글쓰기 능력", subject: "영어" },
-    ]
+    grades: currentStudent.성적 || [],
+    highlights: currentStudent.highlights || []
   };
 
   const navItems = [
