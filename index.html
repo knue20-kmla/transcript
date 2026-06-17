@@ -3,193 +3,103 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KMLA Transcript System</title>
+  <title>KMLA 생기부 조회 시스템</title>
 
-  <!-- React & Babel -->
+  <!-- React 및 Babel CDN -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  <!-- Marked.js -->
+  <!-- Marked.js (마크다운 렌더링) -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- PapaParse (CSV 파싱) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Pretendard', 'Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* 다크모드 */
-    body.dark {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    }
-
-    /* 글래스모피즘 카드 */
-    .glass {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    }
-
-    body.dark .glass {
-      background: rgba(30, 30, 46, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    }
-
-    /* 부드러운 애니메이션 */
-    .smooth-transition {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .hover-lift:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
-    }
-
-    /* 그라데이션 텍스트 */
-    .gradient-text {
-      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    body.dark .gradient-text {
-      background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    /* 스크롤바 */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.05);
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: rgba(30, 64, 175, 0.5);
-      border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(30, 64, 175, 0.8);
+      margin: 0;
+      font-family: 'Pretendard', 'Inter', sans-serif;
+      background: #f1f6fa;
+      color: #334155;
     }
 
     /* 마크다운 스타일 */
-    .markdown h2 {
+    .markdown-content {
+      line-height: 1.8;
+      color: #1e293b;
+    }
+    .markdown-content h2 {
       font-size: 1.25rem;
       font-weight: 700;
-      color: #1e40af;
+      color: #1e3a8a;
       margin: 1.5rem 0 0.75rem;
       padding-bottom: 0.5rem;
-      border-bottom: 2px solid rgba(30, 64, 175, 0.2);
+      border-bottom: 2px solid #e0e7ff;
     }
-
-    body.dark .markdown h2 {
-      color: #60a5fa;
-      border-bottom-color: rgba(96, 165, 250, 0.2);
+    .markdown-content h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2563eb;
+      margin: 1rem 0 0.5rem;
     }
-
-    .markdown p {
-      line-height: 1.8;
+    .markdown-content p {
       margin: 0.75rem 0;
-      color: #374151;
     }
-
-    body.dark .markdown p {
-      color: #d1d5db;
-    }
-
-    .markdown strong {
+    .markdown-content strong {
       color: #dc2626;
       font-weight: 700;
     }
-
-    body.dark .markdown strong {
-      color: #f87171;
-    }
-
-    .markdown hr {
-      margin: 2rem 0;
+    .markdown-content hr {
+      margin: 1.5rem 0;
       border: none;
-      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      border-top: 1px solid #e2e8f0;
     }
-
-    body.dark .markdown hr {
-      border-top-color: rgba(255, 255, 255, 0.1);
+    .markdown-content ul {
+      list-style: disc;
+      padding-left: 1.5rem;
+      margin: 0.75rem 0;
+    }
+    .markdown-content li {
+      margin: 0.5rem 0;
     }
 
     /* 아코디언 애니메이션 */
     .accordion-content {
       max-height: 0;
       overflow: hidden;
-      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: max-height 0.3s ease-out;
     }
-
     .accordion-content.open {
       max-height: 5000px;
+      transition: max-height 0.5s ease-in;
     }
 
-    /* 탭 인디케이터 */
-    .tab-indicator {
-      position: absolute;
-      bottom: 0;
-      height: 3px;
-      background: linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border-radius: 3px 3px 0 0;
-    }
+    /* 스크롤바 */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #e2e8f0; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
 
-    /* 로딩 애니메이션 */
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
+    .desktop-sidebar { display: flex !important; }
+    .mobile-menu-btn { display: none !important; }
 
-    .animate-pulse {
-      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-
-    /* 버튼 호버 효과 */
-    .btn-primary {
-      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn-primary::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-      transition: left 0.5s;
-    }
-
-    .btn-primary:hover::before {
-      left: 100%;
+    @media (max-width: 1100px) {
+      .desktop-sidebar { display: none !important; }
+      .mobile-menu-btn { display: flex !important; }
     }
   </style>
 </head>
@@ -200,346 +110,180 @@
 const { useState, useEffect, useMemo } = React;
 
 // ==================== 설정 ====================
-const DATA_BASE = 'https://raw.githubusercontent.com/knue20-kmla/transcript/main/data/';
-const GITHUB_BASE = 'https://raw.githubusercontent.com/knue20-kmla/transcript/main/markdown/';
+const GOOGLE_SHEETS_BASE = 'https://docs.google.com/spreadsheets/d/';
+const SHEET_ID = '10x7vkogOxuUiYcy62PAtHgZHCu4roQAi6LKRavchrJ8'; // 구글 시트 ID
+const GITHUB_BASE = 'https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/markdown/'; // 마크다운 파일 경로 (GitHub 저장소 만든 후 수정)
 
-// ==================== 아이콘 ====================
-const Icon = ({ name, size = 20, className = "" }) => {
-  const icons = {
-    sun: "M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z",
-    moon: "M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z",
-    menu: "M4 6h16M4 12h16M4 18h16",
-    x: "M6 18L18 6M6 6l12 12",
-    home: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
-    chart: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
-    book: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253",
-    user: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
-    search: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z",
-    chevronDown: "M19 9l-7 7-7-7",
+// ==================== 아이콘 컴포넌트 ====================
+const Ic = ({ name, size=18, cls="" }) => {
+  const paths = {
+    User:    { d:"M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2", d2:"M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" },
+    Bar:     { d:"M3 3v18h18", d2:"M7 16V8m5 8V5m5 11v-4" },
+    Book:    { d:"M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z", d2:"M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" },
+    Compass: { d:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z", d2:"M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z" },
+    Activity:{ d:"M22 12h-4l-3 9L9 3l-3 9H2" },
+    Star:    { d:"M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" },
+    Search:  { d:"M21 21l-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0" },
+    Menu:    { d:"M3 12h18M3 6h18M3 18h18" },
+    X:       { d:"M18 6L6 18M6 6l12 12" },
+    ChevD:   { d:"M6 9l6 6 6-6" },
+    Layout:  { d:"M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z" },
   };
-
+  const p = paths[name] || { d:"" };
   return (
-    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d={icons[name]} />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+      strokeLinejoin="round" className={cls}>
+      <path d={p.d}/>{p.d2 && <path d={p.d2}/>}
     </svg>
   );
 };
 
-// ==================== 컴포넌트 ====================
+// ==================== 카드 컴포넌트 ====================
+const Card = ({ children, title, iconName, className="" }) => (
+  <div className={`bg-white border border-blue-100 shadow-sm rounded-2xl p-6 ${className}`}>
+    {title && (
+      <div className="flex items-center gap-3 mb-6">
+        {iconName && <Ic name={iconName} size={18} cls="text-blue-500" />}
+        <h3 className="m-0 text-lg font-black text-slate-800">{title}</h3>
+      </div>
+    )}
+    {children}
+  </div>
+);
 
-// 대시보드 탭
-const Dashboard = ({ student }) => {
-  const [achPopupOpen, setAchPopupOpen] = useState(false);
+// ==================== 대시보드 탭 ====================
+const DashboardTab = ({ studentData }) => {
+  const { grades, highlights } = studentData;
 
-  const avgGrade = useMemo(() => {
-    if (!student.성적 || student.성적.length === 0) return "—";
-    let totalScore = 0, totalCredits = 0;
-    student.성적.forEach(g => {
+  const getOverallAvgGrade = () => {
+    if (!grades || grades.length === 0) return "—";
+    let totalScore = 0;
+    let totalCredits = 0;
+    grades.forEach(g => {
       if (g.등급) {
         totalScore += g.등급 * (g.학점 || 3);
         totalCredits += (g.학점 || 3);
       }
     });
     return totalCredits > 0 ? (totalScore / totalCredits).toFixed(2) : "—";
-  }, [student]);
-
-  const achSubjects = useMemo(() => {
-    return (student.성적 || []).filter(g =>
-      g.성취도 && // 성취도가 있고
-      !g.등급 && // 등급이 없고
-      g.원점수 !== 'P' // P 과목이 아님
-    );
-  }, [student]);
-
-  const achCount = achSubjects.length;
-
-  const achBreakdown = useMemo(() => {
-    const counts = { A: 0, B: 0, C: 0 };
-    achSubjects.forEach(subj => {
-      const grade = subj.성취도?.toUpperCase();
-      if (grade === 'A') counts.A++;
-      else if (grade === 'B') counts.B++;
-      else if (grade === 'C') counts.C++;
-    });
-    return counts;
-  }, [achSubjects]);
+  };
 
   return (
-    <div className="space-y-6">
-      {/* 통계 카드 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="glass rounded-3xl p-8 hover-lift smooth-transition">
+    <div className="flex flex-col gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <Card className="bg-gradient-to-br from-blue-50 to-white">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">전체 평균 등급</h3>
-            <Icon name="chart" size={24} className="text-blue-500" />
+            <p className="text-xs font-black text-blue-600 uppercase">전체 평균 등급</p>
+            <Ic name="Bar" size={16} cls="text-blue-500" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-5xl font-black gradient-text">{avgGrade}</span>
-            <span className="text-lg text-gray-400">등급</span>
+            <p className="text-4xl font-black text-slate-800 m-0">{getOverallAvgGrade()}</p>
+            <span className="text-xs font-bold text-slate-400">등급</span>
           </div>
-        </div>
+        </Card>
 
-        <div className="glass rounded-3xl p-8 hover-lift smooth-transition cursor-pointer" onClick={() => setAchPopupOpen(true)}>
+        <Card className="bg-gradient-to-br from-indigo-50 to-white">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">성취도 과목</h3>
-            <Icon name="book" size={24} className="text-blue-500" />
+            <p className="text-xs font-black text-indigo-600 uppercase">성취도 과목</p>
+            <Ic name="Activity" size={16} cls="text-indigo-500" />
           </div>
-          <div className="flex items-baseline gap-2 mb-3">
-            <span className="text-5xl font-black gradient-text">{achCount}</span>
-            <span className="text-lg text-gray-400">과목</span>
+          <div className="flex items-baseline gap-2">
+            <p className="text-4xl font-black text-slate-800 m-0">{grades.filter(g => g.성취도).length}</p>
+            <span className="text-xs font-bold text-slate-400">과목</span>
           </div>
-          <div className="flex gap-2 flex-wrap">
-            {achBreakdown.A > 0 && (
-              <span className="text-xs font-bold px-2 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
-                A {achBreakdown.A}개
-              </span>
-            )}
-            {achBreakdown.B > 0 && (
-              <span className="text-xs font-bold px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-                B {achBreakdown.B}개
-              </span>
-            )}
-            {achBreakdown.C > 0 && (
-              <span className="text-xs font-bold px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
-                C {achBreakdown.C}개
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-gray-400 mt-3">클릭하여 상세 보기</p>
-        </div>
+        </Card>
       </div>
 
-      {/* 교과군별 등급 추이 */}
-      <div className="glass rounded-3xl p-8">
-        <h3 className="text-2xl font-bold mb-6 gradient-text flex items-center gap-2">
-          📈 교과군별 등급 추이
-        </h3>
-
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b-2 border-blue-200 dark:border-blue-800">
-                <th className="text-left py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">과목군</th>
-                <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300">1-1</th>
-                <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300">1-2</th>
-                <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300">2-1</th>
-                <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300">2-2</th>
-                <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300 w-32">추이 그래프</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { name: "국어", grades: [4, 3, null, null], subjects: ["국어", "국어", "", ""] },
-                { name: "수학", grades: [4, 5, 5, 6], subjects: ["수학", "수학", "수학Ⅰ", "수학Ⅱ"] },
-                { name: "영어", grades: [3, 3, null, null], subjects: ["영어", "영어", "", ""] },
-                { name: "사회", grades: [3, 4, null, 6], subjects: ["통사", "통사", "", "사회·문화"] },
-                { name: "과학", grades: [6, 5, 6, null], subjects: ["통과학", "통과학", "생명Ⅰ", ""] }
-              ].map((subject, idx) => {
-                const validGrades = subject.grades.map((g, i) => ({ grade: g, index: i })).filter(item => item.grade !== null);
-
-                return (
-                  <tr key={idx} className="border-b border-gray-100 dark:border-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/10 smooth-transition">
-                    <td className="py-4 px-4 font-bold text-gray-800 dark:text-gray-200">{subject.name}</td>
-                    {subject.grades.map((grade, i) => (
-                      <td key={i} className="py-4 px-4 text-center">
-                        {grade ? (
-                          <div className="flex flex-col items-center gap-1">
-                            {subject.subjects[i] && (
-                              <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400">
-                                {subject.subjects[i]}
-                              </span>
-                            )}
-                            <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold shadow-lg">
-                              {grade}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-gray-300 dark:text-gray-600">—</span>
-                        )}
-                      </td>
-                    ))}
-                    <td className="py-4 px-4">
-                      {validGrades.length > 1 ? (
-                        <svg width="100" height="40" className="mx-auto">
-                          {validGrades.map((item, i) => {
-                            if (i === 0) return null;
-                            const prev = validGrades[i - 1];
-                            const x1 = 10 + prev.index * 25;
-                            const y1 = 35 - (prev.grade - 1) * 5;
-                            const x2 = 10 + item.index * 25;
-                            const y2 = 35 - (item.grade - 1) * 5;
-                            return (
-                              <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
-                                stroke="#3b82f6" strokeWidth="2" />
-                            );
-                          })}
-                          {validGrades.map((item, i) => {
-                            const x = 10 + item.index * 25;
-                            const y = 35 - (item.grade - 1) * 5;
-                            return (
-                              <g key={i}>
-                                <circle cx={x} cy={y} r="3" fill="#3b82f6" />
-                                <text x={x} y={y - 6} fontSize="10" fill="#64748b" textAnchor="middle" fontWeight="bold">
-                                  {item.grade}
-                                </text>
-                              </g>
-                            );
-                          })}
-                        </svg>
-                      ) : (
-                        <span className="text-xs text-gray-400">—</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* 진로선택 성취도 상세 팝업 */}
-      {achPopupOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setAchPopupOpen(false)}>
-          <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-black gradient-text">진로선택 성취도 과목 상세</h3>
-              <button onClick={() => setAchPopupOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {achSubjects.length > 0 ? achSubjects.map((subj, idx) => {
-                const score = parseFloat(subj.원점수);
-                const avg = parseFloat(subj.평균);
-                const isAboveAvg = !isNaN(score) && !isNaN(avg) && score >= avg;
-                const diff = !isNaN(score) && !isNaN(avg) ? Math.abs(score - avg).toFixed(1) : null;
-
-                return (
-                  <div key={idx} className="p-5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{subj.학년} {subj.학기}</div>
-                        <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">{subj.과목}</h4>
-                      </div>
-                      <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-bold shadow-lg text-lg">
-                        {subj.성취도}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4 mb-3">
-                      <div className="text-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">원점수</div>
-                        <div className="text-xl font-black text-gray-900 dark:text-gray-100">{subj.원점수 || '—'}</div>
-                      </div>
-                      <div className="text-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">과목평균</div>
-                        <div className="text-xl font-black text-gray-600 dark:text-gray-300">{subj.평균 || '—'}</div>
-                      </div>
-                      <div className="text-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">학점</div>
-                        <div className="text-xl font-black text-gray-900 dark:text-gray-100">{subj.학점 || 3}</div>
-                      </div>
-                    </div>
-
-                    {diff && (
-                      <div className={`text-center p-3 rounded-lg ${isAboveAvg ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800' : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'}`}>
-                        <span className={`text-sm font-bold ${isAboveAvg ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
-                          {isAboveAvg ? '▲' : '▼'} {diff}점 ({isAboveAvg ? '평균 이상' : '평균 이하'})
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                );
-              }) : (
-                <div className="text-center py-12 text-gray-400">성취도 과목 데이터가 없습니다.</div>
-              )}
-            </div>
+      {highlights && highlights.length > 0 && (
+        <Card title="⭐ 주요 세특 평가 표현" iconName="Star" className="border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-white">
+          <div className="flex flex-col gap-3">
+            {highlights.map((h, i) => (
+              <div key={i} className="p-4 bg-white rounded-xl border-l-4 border-fuchsia-500 shadow-sm">
+                <p className="text-sm font-bold text-slate-800 mb-2">"{h.text}"</p>
+                <span className="inline-block px-2 py-1 bg-fuchsia-50 text-fuchsia-700 text-xs font-bold rounded">
+                  {h.subject}
+                </span>
+              </div>
+            ))}
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );
 };
 
-// 성적 탭
-const Grades = ({ student }) => {
+// ==================== 성적 탭 ====================
+const GradesTab = ({ studentData }) => {
+  const { grades } = studentData;
   const [year, setYear] = useState("1학년");
   const [sem, setSem] = useState("1학기");
 
   const filtered = useMemo(() => {
-    return (student.성적 || []).filter(g => g.학년 === year && g.학기 === sem);
-  }, [student, year, sem]);
+    return grades.filter(g => g.학년 === year && g.학기 === sem);
+  }, [grades, year, sem]);
 
   return (
-    <div className="glass rounded-3xl p-8">
-      <h3 className="text-2xl font-bold mb-6 gradient-text">성적 조회</h3>
-      
-      <div className="flex flex-wrap gap-3 mb-6">
+    <Card title="성적 상세 조회" iconName="Bar">
+      <div className="flex gap-2 mb-4">
         {["1학년", "2학년"].map(y => (
           <button key={y} onClick={() => setYear(y)}
-            className={`px-6 py-2.5 rounded-full text-sm font-bold smooth-transition ${
-              year === y ? 'btn-primary text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-            }`}>
-            {y}
-          </button>
+            className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+              year === y ? 'bg-blue-600 text-white' : 'bg-white text-slate-500 border border-slate-200'
+            }`}>{y}</button>
         ))}
       </div>
-
-      <div className="flex flex-wrap gap-3 mb-8">
+      <div className="flex gap-2 mb-6">
         {["1학기", "2학기"].map(s => (
           <button key={s} onClick={() => setSem(s)}
-            className={`px-6 py-2.5 rounded-full text-sm font-bold smooth-transition ${
-              sem === s ? 'btn-primary text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-            }`}>
-            {s}
-          </button>
+            className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+              sem === s ? 'bg-blue-600 text-white' : 'bg-white text-slate-500 border border-slate-200'
+            }`}>{s}</button>
         ))}
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b-2 border-blue-200 dark:border-blue-800">
-              <th className="text-left py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">과목</th>
-              <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">학점</th>
-              <th className="text-right py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">원점수</th>
-              <th className="text-right py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">평균</th>
-              <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">등급/성취도</th>
+        <table className="w-full text-left border-collapse">
+          <thead className="bg-blue-50">
+            <tr>
+              <th className="p-4 text-xs font-bold text-slate-500">과목</th>
+              <th className="p-4 text-xs font-bold text-slate-500 text-center">학점</th>
+              <th className="p-4 text-xs font-bold text-slate-500 text-right">원점수</th>
+              <th className="p-4 text-xs font-bold text-slate-500 text-right">평균</th>
+              <th className="p-4 text-xs font-bold text-slate-500 text-center">등급/성취도</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length > 0 ? filtered.map((g, i) => (
-              <tr key={i} className="border-b border-gray-100 dark:border-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/10 smooth-transition">
-                <td className="py-4 px-4 font-semibold text-gray-800 dark:text-gray-200">{g.과목}</td>
-                <td className="py-4 px-4 text-center text-gray-600 dark:text-gray-400">{g.학점 || 3}</td>
-                <td className="py-4 px-4 text-right font-semibold text-gray-800 dark:text-gray-200">{g.원점수 || '—'}</td>
-                <td className="py-4 px-4 text-right text-gray-500 dark:text-gray-400">{g.평균 || '—'}</td>
-                <td className="py-4 px-4 text-center">
+              <tr key={i} className="border-b hover:bg-blue-50">
+                <td className="p-4 font-bold text-slate-800">{g.과목}</td>
+                <td className="p-4 text-center">{g.학점 || 3}</td>
+                <td className="p-4 text-right">{g.원점수 || '—'}</td>
+                <td className="p-4 text-right text-slate-500">{g.평균 || '—'}</td>
+                <td className="p-4 text-center">
                   {g.등급 ? (
-                    <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold shadow-lg">
+                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white font-bold bg-blue-600">
                       {g.등급}
                     </span>
                   ) : g.성취도 ? (
-                    <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-bold shadow-lg">
+                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-white font-bold bg-fuchsia-600">
                       {g.성취도}
                     </span>
                   ) : '—'}
                 </td>
               </tr>
             )) : (
-              <tr><td colSpan="5" className="py-12 text-center text-gray-400">데이터 없음</td></tr>
+              <tr><td colSpan="5" className="p-8 text-center text-slate-400">데이터 없음</td></tr>
             )}
           </tbody>
         </table>
       </div>
-    </div>
+    </Card>
   );
 };
 
-// 세특 탭
-const Seteuk = ({ studentName, subject, setSubject, student }) => {
+// ==================== 세특 탭 (마크다운) ====================
+const SeteukTab = ({ studentName, subject, setSubject }) => {
   const [mdContent, setMdContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [openSections, setOpenSections] = useState({});
@@ -548,439 +292,75 @@ const Seteuk = ({ studentName, subject, setSubject, student }) => {
     if (subject === "전체 분석") return;
 
     setLoading(true);
-
-    // 마크다운 파일을 먼저 시도
-    fetch(`${GITHUB_BASE}${studentName}_세특_${subject}.md`)
-      .then(res => {
-        if (!res.ok) throw new Error('마크다운 파일 없음');
-        return res.text();
-      })
+    const fileName = `${studentName}_세특_${subject}.md`;
+    fetch(`${GITHUB_BASE}${fileName}`)
+      .then(res => res.text())
       .then(text => {
         setMdContent(text);
         setLoading(false);
       })
       .catch(err => {
-        // 마크다운 파일이 없으면 JSON 데이터에서 세특 찾기
-        console.log('마크다운 파일 없음, JSON 사용:', err);
-        const grades = student.성적 || [];
-        const subjectSeteuk = grades
-          .filter(g => g.과목 && g.과목.includes(subject) && g.세특)
-          .map(g => `## ${g.학년} ${g.학기}\n\n${g.세특}`)
-          .join('\n\n');
-
-        if (subjectSeteuk) {
-          setMdContent(`# ${subject}\n\n${subjectSeteuk}`);
-        } else {
-          setMdContent('# 데이터를 불러올 수 없습니다.');
-        }
+        console.error(err);
+        setMdContent('# 데이터를 불러올 수 없습니다.');
         setLoading(false);
       });
-  }, [studentName, subject, student]);
+  }, [studentName, subject]);
 
-  const sections = useMemo(() => {
+  const toggleSection = (idx) => {
+    setOpenSections(prev => ({ ...prev, [idx]: !prev[idx] }));
+  };
+
+  const parsedSections = useMemo(() => {
     if (!mdContent) return [];
-
-    // marked.js로 HTML 변환
-    const html = marked.parse(mdContent);
-
-    // HTML을 DOM으로 파싱
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-
-    // h2 태그로 섹션 구분
-    const h2Tags = doc.querySelectorAll('h2');
-    const result = [];
-
-    h2Tags.forEach(h2 => {
-      const title = h2.textContent;
-      const contentParts = [];
-      let nextElement = h2.nextElementSibling;
-
-      // 다음 h2가 나올 때까지 모든 내용 수집
-      while (nextElement && nextElement.tagName !== 'H2') {
-        contentParts.push(nextElement.outerHTML);
-        nextElement = nextElement.nextElementSibling;
-      }
-
-      result.push({
-        title: title,
-        content: contentParts.join('')
-      });
+    const sections = mdContent.split(/\n## /).filter(s => s.trim());
+    return sections.map(s => {
+      const lines = s.split('\n');
+      const title = lines[0].replace(/^# /, '');
+      const content = lines.slice(1).join('\n');
+      return { title, content };
     });
-
-    return result;
   }, [mdContent]);
 
-  const 세특분석 = student.세특종합분석 || {};
-
   return (
-    <div className="space-y-6">
-      <div className="glass rounded-3xl p-6">
-        <div className="flex flex-wrap gap-3">
-          {["전체 분석", "국어", "영어", "수학", "과학", "사회", "정보", "교양"].map(s => (
-            <button key={s} onClick={() => setSubject(s)}
-              className={`px-5 py-2.5 rounded-full text-sm font-bold smooth-transition ${
-                subject === s ? 'btn-primary text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-              }`}>
-              {s}
-            </button>
-          ))}
-        </div>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap gap-2">
+        {["전체 분석", "국어", "영어", "수학", "과학", "사회", "정보", "교양"].map(s => (
+          <button key={s} onClick={() => setSubject(s)}
+            className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+              subject === s ? 'bg-blue-600 text-white' : 'bg-white text-slate-500 border'
+            }`}>{s}</button>
+        ))}
       </div>
 
       {subject === "전체 분석" ? (
-        <div className="space-y-6">
-          <div className="glass rounded-3xl p-8">
-            <h3 className="text-xl font-bold gradient-text mb-4">📊 과목별 종합역량 분석</h3>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">학생의 세부능력 및 특기사항에 나타난 과목군별 핵심 역량과 발전 가능성을 종합 분석한 내용입니다.</p>
-          </div>
-
-          {Object.keys(세특분석).length > 0 ? (
-            <div className="grid grid-cols-1 gap-6">
-              {Object.entries(세특분석).map(([subject, data]) => (
-                <div key={subject} className="glass rounded-3xl p-8 hover-lift smooth-transition">
-                  <h4 className="text-2xl font-black mb-6 gradient-text">{subject}</h4>
-
-                  {/* 핵심역량 */}
-                  <div className="mb-6">
-                    <h5 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">핵심역량</h5>
-                    <div className="flex flex-wrap gap-2">
-                      {data.핵심역량.map((역량, i) => (
-                        <span key={i} className="px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-bold rounded-full border border-blue-200 dark:border-blue-800">
-                          {역량}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* 주요평가 */}
-                  <div className="mb-6">
-                    <h5 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">주요 평가</h5>
-                    <ul className="space-y-3">
-                      {data.주요평가.map((평가, i) => (
-                        <li key={i} className="flex gap-3 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                          <span className="text-blue-500 font-bold mt-1">•</span>
-                          <span>{평가}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* 발전가능성 */}
-                  <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl border-l-4 border-blue-500">
-                    <h5 className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-2">💡 발전 가능성</h5>
-                    <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{data.발전가능성}</p>
+        <Card title="전체 분석" iconName="Book">
+          <p className="text-sm text-slate-600">각 과목을 선택하여 상세 기록을 확인하세요.</p>
+        </Card>
+      ) : (
+        <Card title={`${subject} 세특 기록`} iconName="Book">
+          {loading ? (
+            <p className="text-center text-slate-400 py-8">불러오는 중...</p>
+          ) : parsedSections.length > 0 ? (
+            <div className="flex flex-col gap-3">
+              {parsedSections.slice(1).map((sec, idx) => (
+                <div key={idx} className="border border-blue-100 rounded-xl overflow-hidden">
+                  <button
+                    onClick={() => toggleSection(idx)}
+                    className="w-full p-4 bg-blue-50 text-left font-bold text-slate-800 flex justify-between items-center hover:bg-blue-100 transition"
+                  >
+                    <span>📌 {sec.title}</span>
+                    <Ic name="ChevD" size={16} cls={`transform transition-transform ${openSections[idx] ? 'rotate-180' : ''}`} />
+                  </button>
+                  <div className={`accordion-content ${openSections[idx] ? 'open' : ''}`}>
+                    <div className="p-4 markdown-content" dangerouslySetInnerHTML={{ __html: marked.parse(sec.content) }} />
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="glass rounded-3xl p-8 text-center text-gray-400">종합 분석 데이터가 없습니다.</div>
+            <p className="text-center text-slate-400 py-8">데이터 없음</p>
           )}
-        </div>
-      ) : loading ? (
-        <div className="glass rounded-3xl p-12 text-center">
-          <div className="animate-pulse text-gray-400">로딩 중...</div>
-        </div>
-      ) : sections.length > 0 ? (
-        <div className="space-y-4">
-          {sections.map((sec, idx) => (
-            <div key={idx} className="glass rounded-2xl overflow-hidden">
-              <button onClick={() => setOpenSections(prev => ({ ...prev, [idx]: !prev[idx] }))}
-                className="w-full p-5 flex items-center justify-between hover:bg-blue-50 dark:hover:bg-blue-900/20 smooth-transition">
-                <span className="font-bold text-gray-800 dark:text-gray-200">📌 {sec.title}</span>
-                <Icon name="chevronDown" className={`text-gray-400 smooth-transition ${openSections[idx] ? 'rotate-180' : ''}`} />
-              </button>
-              <div className={`accordion-content ${openSections[idx] ? 'open' : ''}`}>
-                <div className="p-6 markdown prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: sec.content }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="glass rounded-3xl p-8 text-center text-gray-400">데이터 없음</div>
-      )}
-    </div>
-  );
-};
-
-// 진로활동 탭
-const Career = ({ student }) => {
-  const [filterYear, setFilterYear] = useState("전체");
-
-  const 진로활동 = student.진로활동 || { 진로와직업: [], 창체진로: [] };
-
-  const filtered진로와직업 = filterYear === "전체"
-    ? 진로활동.진로와직업
-    : 진로활동.진로와직업.filter(item => item.학년 === filterYear);
-
-  const filtered창체진로 = filterYear === "전체"
-    ? 진로활동.창체진로
-    : 진로활동.창체진로.filter(item => item.학년 === filterYear);
-
-  // 하이라이트할 키워드들
-  const highlightKeywords = [
-    // 강한 평가 표현
-    '매우', '탁월한', '뛰어난', '우수한', '훌륭한', '인상적', '적극적', '주도적', '성실하게',
-    '높은 수준', '깊이 있는', '체계적', '논리적', '창의적',
-    // 전문 역량
-    '국제기구', '유엔', 'SDGs', '지속가능발전', '글로벌 시민성', '리더십',
-    '금융', '벤처투자', '국제 정세', '정책 환경',
-    '외교교육', '대중연설', '구조화', '분석', '탐구',
-    // 주요 활동
-    '진로탐방', '박람회', '특강', '프로그램', '토론', '발표',
-    '보편적 참여', '절차적 정당성', '강대국 견제',
-  ];
-
-  const highlightText = (text) => {
-    if (!text) return text;
-
-    let result = text;
-    highlightKeywords.forEach(keyword => {
-      const regex = new RegExp(`(${keyword})`, 'g');
-      result = result.replace(regex, '<mark class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold px-1 rounded">$1</mark>');
-    });
-
-    return result;
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* 필터 */}
-      <div className="glass rounded-3xl p-4">
-        <div className="flex gap-2">
-          {["전체", "1학년", "2학년"].map(year => (
-            <button
-              key={year}
-              onClick={() => setFilterYear(year)}
-              className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
-                filterYear === year
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-              }`}
-            >
-              {year}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 진로와 직업 */}
-      {filtered진로와직업.length > 0 && (
-        <div className="glass rounded-3xl p-8">
-          <h3 className="text-xl font-bold gradient-text mb-6 flex items-center gap-2">
-            📘 진로와 직업 - 세부능력 및 특기사항
-          </h3>
-          <div className="space-y-4">
-            {filtered진로와직업.map((item, i) => (
-              <div key={i} className="p-6 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-2xl border-l-4 border-blue-500">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 text-xs font-bold rounded-full">
-                    {item.학년} {item.학기}
-                  </span>
-                </div>
-                <div
-                  className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{ __html: highlightText(item.내용) }}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 창의적 체험활동 - 진로활동 */}
-      {filtered창체진로.length > 0 && (
-        <div className="glass rounded-3xl p-8">
-          <h3 className="text-xl font-bold gradient-text mb-6 flex items-center gap-2">
-            🎯 창의적 체험활동 - 진로활동 특기사항
-          </h3>
-          <div className="space-y-4">
-            {filtered창체진로.map((item, i) => (
-              <div key={i} className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl border-l-4 border-purple-500">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="px-3 py-1 bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-purple-200 text-xs font-bold rounded-full">
-                    {item.학년} {item.학기}
-                  </span>
-                </div>
-                <div
-                  className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{ __html: highlightText(item.내용) }}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 데이터 없음 */}
-      {filtered진로와직업.length === 0 && filtered창체진로.length === 0 && (
-        <div className="glass rounded-3xl p-8 text-center text-gray-400">
-          선택한 학년의 진로활동 기록이 없습니다.
-        </div>
-      )}
-    </div>
-  );
-};
-
-// 동아리활동 탭
-const Club = ({ student }) => {
-  const [filterYear, setFilterYear] = useState("전체");
-
-  const 동아리활동 = student.동아리활동 || [];
-
-  const filtered = filterYear === "전체"
-    ? 동아리활동
-    : 동아리활동.filter(item => item.학년 === filterYear);
-
-  const highlightKeywords = [
-    '매우', '탁월한', '뛰어난', '우수한', '훌륭한', '인상적', '적극적', '주도적', '성실하게',
-    '높은 수준', '깊이 있는', '체계적', '논리적', '진지하고', '능숙하게', '책임감',
-    '대표', '발표', '토론', '분석', '탐구', '기여', '진취적'
-  ];
-
-  const highlightText = (text) => {
-    if (!text) return text;
-    let result = text;
-    highlightKeywords.forEach(keyword => {
-      const regex = new RegExp(`(${keyword})`, 'g');
-      result = result.replace(regex, '<mark class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 font-bold px-1 rounded">$1</mark>');
-    });
-    return result;
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="glass rounded-3xl p-4">
-        <div className="flex gap-2">
-          {["전체", "1학년", "2학년"].map(year => (
-            <button
-              key={year}
-              onClick={() => setFilterYear(year)}
-              className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
-                filterYear === year
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-              }`}
-            >
-              {year}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {filtered.length > 0 ? (
-        <div className="space-y-4">
-          {filtered.map((item, i) => (
-            <div key={i} className="glass rounded-3xl p-8">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="text-xl font-bold gradient-text mb-2">{item.동아리명}</h3>
-                  <div className="flex gap-2">
-                    <span className="px-3 py-1 bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200 text-xs font-bold rounded-full">
-                      {item.학년} {item.학기}
-                    </span>
-                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 text-xs font-bold rounded-full">
-                      {item.시간}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div
-                className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: highlightText(item.내용) }}
-              />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="glass rounded-3xl p-8 text-center text-gray-400">
-          선택한 학년의 동아리활동 기록이 없습니다.
-        </div>
-      )}
-    </div>
-  );
-};
-
-// 자율활동 탭
-const Autonomous = ({ student }) => {
-  const 자율활동 = student.자율활동 || [];
-
-  const highlightKeywords = [
-    '성실히', '충실히', '적극적', '최선을 다해', '인상적', '성공적',
-    '전교', '사법위원장', '책임감', '리더십', '공동체'
-  ];
-
-  const highlightText = (text) => {
-    if (!text) return text;
-    let result = text;
-    highlightKeywords.forEach(keyword => {
-      const regex = new RegExp(`(${keyword})`, 'g');
-      result = result.replace(regex, '<mark class="bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400 font-bold px-1 rounded">$1</mark>');
-    });
-    return result;
-  };
-
-  return (
-    <div className="space-y-6">
-      {자율활동.length > 0 ? (
-        자율활동.map((item, i) => (
-          <div key={i} className="glass rounded-3xl p-8">
-            <h3 className="text-xl font-bold gradient-text mb-6 flex items-center gap-2">
-              🌟 {item.학년} 자율활동 특기사항
-            </h3>
-            <div
-              className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: highlightText(item.내용) }}
-            />
-          </div>
-        ))
-      ) : (
-        <div className="glass rounded-3xl p-8 text-center text-gray-400">
-          자율활동 기록이 없습니다.
-        </div>
-      )}
-    </div>
-  );
-};
-
-// 행동특성 및 종합의견 탭
-const Behavior = ({ student }) => {
-  const 행동특성 = student.행동특성 || [];
-
-  const highlightKeywords = [
-    '노블레스 오블리주', '국제기구', '뛰어남', '인상적', '성실하게', '책임',
-    '차분하고', '성숙한', '신뢰', '안정감', '일관되게', '공동체', '가치'
-  ];
-
-  const highlightText = (text) => {
-    if (!text) return text;
-    let result = text;
-    highlightKeywords.forEach(keyword => {
-      const regex = new RegExp(`(${keyword})`, 'g');
-      result = result.replace(regex, '<mark class="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 font-bold px-1 rounded">$1</mark>');
-    });
-    return result;
-  };
-
-  return (
-    <div className="space-y-6">
-      {행동특성.length > 0 ? (
-        행동특성.map((item, i) => (
-          <div key={i} className="glass rounded-3xl p-8">
-            <h3 className="text-xl font-bold gradient-text mb-6 flex items-center gap-2">
-              📋 {item.학년} 행동특성 및 종합의견
-            </h3>
-            <div
-              className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: highlightText(item.내용) }}
-            />
-          </div>
-        ))
-      ) : (
-        <div className="glass rounded-3xl p-8 text-center text-gray-400">
-          행동특성 기록이 없습니다.
-        </div>
+        </Card>
       )}
     </div>
   );
@@ -988,176 +368,167 @@ const Behavior = ({ student }) => {
 
 // ==================== 메인 앱 ====================
 function App() {
-  const [darkMode, setDarkMode] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState("권정민");
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // 데이터
   const [students, setStudents] = useState([]);
+  const [gradesData, setGradesData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // 세특 탭
   const [seSubject, setSeSubject] = useState("전체 분석");
 
   useEffect(() => {
-    document.body.classList.toggle('dark', darkMode);
-  }, [darkMode]);
+    // 구글 시트 데이터 로드 (CSV export 형식)
+    // 실제 사용 시 SHEET_ID를 입력하고 "웹에 게시" 설정 필요
+    Promise.all([
+      fetch(`${GOOGLE_SHEETS_BASE}${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=학생_기본정보`).then(r => r.text()),
+      fetch(`${GOOGLE_SHEETS_BASE}${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=성적_등급과목`).then(r => r.text()),
+      fetch(`${GOOGLE_SHEETS_BASE}${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=성적_성취도과목`).then(r => r.text()),
+    ])
+    .then(([studentsCSV, gradesCSV, achCSV]) => {
+      const studentsParsed = Papa.parse(studentsCSV, { header: true }).data;
+      const gradesParsed = Papa.parse(gradesCSV, { header: true }).data;
+      const achParsed = Papa.parse(achCSV, { header: true }).data;
 
-  useEffect(() => {
-    fetch(`${DATA_BASE}students.json`)
-      .then(res => res.json())
-      .then(data => {
-        setStudents(data.students);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('데이터 로드 실패:', err);
-        setLoading(false);
-      });
+      setStudents(studentsParsed);
+      setGradesData([...gradesParsed, ...achParsed]);
+      setLoading(false);
+    })
+    .catch(err => {
+      console.error(err);
+      setLoading(false);
+    });
   }, []);
 
   const currentStudent = useMemo(() => {
     return students.find(s => s.이름 === selectedStudent) || {};
   }, [students, selectedStudent]);
 
-  const tabs = [
-    { id: 'dashboard', name: '대시보드', icon: 'home' },
-    { id: 'grades', name: '성적', icon: 'chart' },
-    { id: 'seteuk', name: '세특', icon: 'book' },
-    { id: 'career', name: '진로활동', icon: 'user' },
-    { id: 'club', name: '동아리', icon: 'user' },
-    { id: 'autonomous', name: '자율활동', icon: 'user' },
-    { id: 'behavior', name: '행특', icon: 'user' },
+  const currentGrades = useMemo(() => {
+    return gradesData.filter(g => g.학생명 === selectedStudent);
+  }, [gradesData, selectedStudent]);
+
+  const studentData = {
+    ...currentStudent,
+    grades: currentGrades,
+    highlights: [
+      { text: "한차원 더 깊은 사고를 하는 모습", subject: "국어" },
+      { text: "입체적으로 분석하고 추적하는 능력이 뛰어남", subject: "언어와 매체" },
+      { text: "탁월한 학술적 글쓰기 능력", subject: "영어" },
+    ]
+  };
+
+  const navItems = [
+    { id: "dashboard", label: "대시보드", icon: "Layout" },
+    { id: "grades", label: "성적 분석", icon: "Bar" },
+    { id: "seteuk", label: "세특", icon: "Book" },
+    { id: "career", label: "진로활동", icon: "Compass" },
+    { id: "autonomous", label: "자율활동", icon: "Activity" },
+    { id: "behavior", label: "행동특성", icon: "User" },
   ];
+
+  const renderTab = () => {
+    if (activeTab === "dashboard") return <DashboardTab studentData={studentData} />;
+    if (activeTab === "grades") return <GradesTab studentData={studentData} />;
+    if (activeTab === "seteuk") return <SeteukTab studentName={selectedStudent} subject={seSubject} setSubject={setSeSubject} />;
+    return <Card title={activeTab}><p>준비 중...</p></Card>;
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-pulse text-white text-2xl font-bold mb-4">로딩 중...</div>
-          <div className="w-16 h-16 mx-auto border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-        </div>
+        <p className="text-slate-500">데이터 로딩 중...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* 헤더 */}
-        <header className="glass rounded-3xl p-6 mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-lg p-1">
-                <img src="https://i.imgur.com/Mo4ogKc.png" alt="KMLA Logo" className="w-full h-full object-contain" />
-              </div>
-              <div>
-                <h1 className="text-2xl md:text-3xl font-black gradient-text">KMLA Transcript</h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">학교생활기록부 조회 시스템</p>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {sidebarOpen && (
+        <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30" />
+      )}
+
+      <div className="flex">
+        {/* Sidebar */}
+        <aside className={`desktop-sidebar fixed top-0 left-0 w-72 h-screen bg-white/90 backdrop-blur-xl border-r border-blue-100 z-40 flex-col ${sidebarOpen ? 'flex' : 'hidden'}`}>
+          <div className="p-6">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black">K</div>
+              <h1 className="text-xl font-black text-blue-900">KMLA</h1>
             </div>
 
+            <nav className="flex flex-col gap-2">
+              {navItems.map(item => (
+                <button key={item.id} onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
+                  className={`flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition ${
+                    activeTab === item.id ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'
+                  }`}>
+                  <Ic name={item.icon} size={16} />
+                  {item.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </aside>
+
+        {/* Main */}
+        <main className="flex-1 md:ml-72 p-6">
+          <header className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-4">
-              {/* 다크모드 토글 */}
-              <button onClick={() => setDarkMode(!darkMode)}
-                className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:scale-110 smooth-transition">
-                <Icon name={darkMode ? 'sun' : 'moon'} size={20} className="text-gray-600 dark:text-gray-300" />
+              <button onClick={() => setSidebarOpen(true)} className="mobile-menu-btn p-2 bg-white rounded-lg border">
+                <Ic name="Menu" size={18} />
               </button>
-
-              {/* 학생 선택 */}
-              <select value={selectedStudent} onChange={e => setSelectedStudent(e.target.value)}
-                className="px-6 py-2.5 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold text-sm border-none outline-none cursor-pointer shadow-lg hover:shadow-xl smooth-transition">
-                {students.map(s => (
-                  <option key={s.이름} value={s.이름}>{s.이름}</option>
-                ))}
-              </select>
+              <h2 className="text-2xl font-black text-slate-800">학교생활기록부 조회</h2>
             </div>
-          </div>
-        </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* 프로필 카드 */}
-          <div className="lg:col-span-1">
-            <div className="glass rounded-3xl p-8 text-center hover-lift smooth-transition">
-              <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-500 p-1 shadow-xl">
-                <div className="w-full h-full rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-                  {currentStudent.프로필이미지URL ? (
-                    <img src={currentStudent.프로필이미지URL} alt={selectedStudent} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Icon name="user" size={48} className="text-gray-400" />
+            <select value={selectedStudent} onChange={e => setSelectedStudent(e.target.value)}
+              className="px-4 py-2 bg-blue-600 text-white font-bold text-sm rounded-full border-none">
+              {students.map(s => (
+                <option key={s.이름} value={s.이름}>{s.이름}</option>
+              ))}
+            </select>
+          </header>
+
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="lg:col-span-1">
+              <Card>
+                <div className="flex flex-col items-center">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 mb-4 flex items-center justify-center overflow-hidden">
+                    {currentStudent.프로필이미지URL ? (
+                      <img src={currentStudent.프로필이미지URL} alt={selectedStudent} className="w-full h-full object-cover" />
+                    ) : (
+                      <Ic name="User" size={40} cls="text-blue-400" />
+                    )}
+                  </div>
+                  <h3 className="text-xl font-black text-slate-800 mb-1">{selectedStudent}</h3>
+                  <p className="text-xs text-blue-600 font-bold mb-4">{currentStudent.계열 || '인문사회계열'}</p>
+                  <div className="grid grid-cols-2 gap-2 w-full text-xs">
+                    <div className="p-2 bg-slate-50 rounded">
+                      <p className="text-slate-500 mb-1">학년/반</p>
+                      <p className="font-bold">{currentStudent.학년} {currentStudent.반}</p>
                     </div>
-                  )}
-                </div>
-              </div>
-
-              <h2 className="text-2xl font-black mb-2 gradient-text">{selectedStudent}</h2>
-              <p className="text-sm text-blue-500 dark:text-blue-400 font-bold mb-6">{currentStudent.계열 || '인문사회계열'}</p>
-
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-                  <p className="text-gray-500 dark:text-gray-400 text-xs mb-1">학년/반</p>
-                  <p className="font-bold text-gray-800 dark:text-gray-200">{currentStudent.학년} {currentStudent.반}</p>
-                </div>
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-                  <p className="text-gray-500 dark:text-gray-400 text-xs mb-1">번호</p>
-                  <p className="font-bold text-gray-800 dark:text-gray-200">{currentStudent.번호 || '—'}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* 주요 세특 평가 표현 */}
-            {currentStudent.highlights && currentStudent.highlights.length > 0 && (
-              <div className="glass rounded-3xl p-6 mt-6">
-                <h3 className="text-sm font-bold mb-4 gradient-text flex items-center gap-2">
-                  <span>⭐</span> 주요 세특 평가 표현
-                </h3>
-                <div className="space-y-3">
-                  {currentStudent.highlights.map((h, i) => (
-                    <div key={i} className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-4 border-l-4 border-blue-500">
-                      <p className="text-gray-800 dark:text-gray-200 font-semibold text-xs mb-2 leading-relaxed">"{h.text}"</p>
-                      <span className="inline-block px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 text-[10px] font-bold rounded-full">
-                        {h.subject}
-                      </span>
+                    <div className="p-2 bg-slate-50 rounded">
+                      <p className="text-slate-500 mb-1">번호</p>
+                      <p className="font-bold">{currentStudent.번호 || '—'}</p>
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-
-          {/* 메인 컨텐츠 */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* 탭 네비게이션 */}
-            <div className="glass rounded-3xl p-2">
-              <div className="flex gap-2 relative">
-                {tabs.map(tab => (
-                  <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                    className={`flex-1 px-6 py-3 rounded-2xl text-sm font-bold smooth-transition flex items-center justify-center gap-2 ${
-                      activeTab === tab.id ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-                    }`}>
-                    <Icon name={tab.icon} size={18} />
-                    <span>{tab.name}</span>
-                  </button>
-                ))}
-              </div>
+              </Card>
             </div>
 
-            {/* 탭 컨텐츠 */}
-            <div>
-              {activeTab === 'dashboard' && <Dashboard student={currentStudent} />}
-              {activeTab === 'grades' && <Grades student={currentStudent} />}
-              {activeTab === 'seteuk' && <Seteuk studentName={selectedStudent} subject={seSubject} setSubject={setSeSubject} student={currentStudent} />}
-              {activeTab === 'career' && <Career student={currentStudent} />}
-              {activeTab === 'club' && <Club student={currentStudent} />}
-              {activeTab === 'autonomous' && <Autonomous student={currentStudent} />}
-              {activeTab === 'behavior' && <Behavior student={currentStudent} />}
+            <div className="lg:col-span-3">
+              {renderTab()}
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );
 }
 
-// 렌더링
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
 </script>
