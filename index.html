@@ -244,7 +244,11 @@ const Dashboard = ({ student }) => {
   }, [student]);
 
   const achSubjects = useMemo(() => {
-    return (student.성적 || []).filter(g => g.성취도);
+    return (student.성적 || []).filter(g =>
+      g.성취도 && // 성취도가 있고
+      !g.등급 && // 등급이 없고
+      g.원점수 !== 'P' // P 과목이 아님
+    );
   }, [student]);
 
   const achCount = achSubjects.length;
