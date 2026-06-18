@@ -302,18 +302,46 @@ def parse_pdf_with_solara(pdf_path):
         return json.loads(content.strip())
     except json.JSONDecodeError as e:
         print(f"❌ JSON 파싱 오류: {e}")
-        print(f"📄 응답 내용 (처음 500자):\n{content[:500]}...")
-        print(f"📄 응답 내용 (마지막 500자):\n...{content[-500:]}")
+
+        # 전체 응답을 파일로 저장
+        error_file = Path(__file__).parent / "temp_response.json"
+        with open(error_file, 'w', encoding='utf-8') as f:
+            f.write(content)
+        print(f"📄 전체 응답 저장: {error_file}")
+
+        # 오류 위치 주변 출력
+        lines = content.split('\n')
+        error_line = e.lineno - 1 if e.lineno else 0
+        start = max(0, error_line - 5)
+        end = min(len(lines), error_line + 5)
+
+        print(f"\n🔍 오류 위치 주변 (라인 {error_line + 1}):")
+        for i in range(start, end):
+            prefix = ">>> " if i == error_line else "    "
+            print(f"{prefix}{i+1:3d}: {lines[i]}")
 
         # JSON 수정 시도
         try:
             import re
-            # trailing commas 제거
-            fixed_content = re.sub(r',(\s*[}\]])', r'\1', content)
+            fixed_content = content
+
+            # 1. trailing commas 제거
+            fixed_content = re.sub(r',(\s*[}\]])', r'\1', fixed_content)
+
+            # 2. 따옴표 안의 개행 문자 제거
+            fixed_content = re.sub(r'"\s*\n\s*"', '""', fixed_content)
+
+            # 3. 잘못된 이스케이프 수정
+            fixed_content = fixed_content.replace('\\"', '"')
+
             print("🔧 JSON 수정 시도 중...")
             return json.loads(fixed_content)
         except Exception as fix_error:
             print(f"❌ JSON 수정 실패: {fix_error}")
+            print(f"\n💡 수동 수정 후 다시 시도하세요:")
+            print(f"   1. {error_file} 파일 열기")
+            print(f"   2. JSON 오류 수정")
+            print(f"   3. 다시 업로드")
             raise Exception(f"Solar API 응답을 JSON으로 파싱할 수 없습니다. 원본 오류: {str(e)}")
 
 def update_students_json(new_student):
