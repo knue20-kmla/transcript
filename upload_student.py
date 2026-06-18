@@ -298,7 +298,23 @@ def parse_pdf_with_solara(pdf_path):
     elif "```" in content:
         content = content.split("```")[1].split("```")[0]
 
-    return json.loads(content.strip())
+    try:
+        return json.loads(content.strip())
+    except json.JSONDecodeError as e:
+        print(f"❌ JSON 파싱 오류: {e}")
+        print(f"📄 응답 내용 (처음 500자):\n{content[:500]}...")
+        print(f"📄 응답 내용 (마지막 500자):\n...{content[-500:]}")
+
+        # JSON 수정 시도
+        try:
+            import re
+            # trailing commas 제거
+            fixed_content = re.sub(r',(\s*[}\]])', r'\1', content)
+            print("🔧 JSON 수정 시도 중...")
+            return json.loads(fixed_content)
+        except Exception as fix_error:
+            print(f"❌ JSON 수정 실패: {fix_error}")
+            raise Exception(f"Solar API 응답을 JSON으로 파싱할 수 없습니다. 원본 오류: {str(e)}")
 
 def update_students_json(new_student):
     """students.json에 학생 추가"""
