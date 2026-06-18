@@ -247,10 +247,13 @@ const Dashboard = ({ student }) => {
     return (student.성적 || []).filter(g => {
       // 등급이 있는 과목 제외
       if (g.등급) return false;
+      // 성취도 필드 확인
+      const 성취도 = g.성취도?.toString() || '';
       // P 성취도 제외
-      if (g.성취도 === 'P') return false;
-      // A, B, C 성취도만 포함
-      return g.성취도 && ['A', 'B', 'C'].includes(g.성취도?.toUpperCase());
+      if (성취도.startsWith('P')) return false;
+      // A, B, C 성취도만 포함 (괄호와 숫자 제거 후 확인)
+      const cleanGrade = 성취도.replace(/\(.*?\)/g, '').trim().toUpperCase();
+      return ['A', 'B', 'C'].includes(cleanGrade);
     });
   }, [student]);
 
@@ -259,10 +262,11 @@ const Dashboard = ({ student }) => {
   const achBreakdown = useMemo(() => {
     const counts = { A: 0, B: 0, C: 0 };
     achSubjects.forEach(subj => {
-      const grade = subj.성취도?.toUpperCase();
-      if (grade === 'A') counts.A++;
-      else if (grade === 'B') counts.B++;
-      else if (grade === 'C') counts.C++;
+      const 성취도 = subj.성취도?.toString() || '';
+      const cleanGrade = 성취도.replace(/\(.*?\)/g, '').trim().toUpperCase();
+      if (cleanGrade === 'A') counts.A++;
+      else if (cleanGrade === 'B') counts.B++;
+      else if (cleanGrade === 'C') counts.C++;
     });
     return counts;
   }, [achSubjects]);
@@ -418,6 +422,8 @@ const Dashboard = ({ student }) => {
                 const avg = parseFloat(subj.평균);
                 const isAboveAvg = !isNaN(score) && !isNaN(avg) && score >= avg;
                 const diff = !isNaN(score) && !isNaN(avg) ? Math.abs(score - avg).toFixed(1) : null;
+                const 성취도 = subj.성취도?.toString() || '';
+                const cleanGrade = 성취도.replace(/\(.*?\)/g, '').trim().toUpperCase();
 
                 return (
                   <div key={idx} className="p-5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900">
@@ -427,7 +433,7 @@ const Dashboard = ({ student }) => {
                         <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">{subj.과목}</h4>
                       </div>
                       <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-bold shadow-lg text-lg">
-                        {subj.성취도}
+                        {cleanGrade}
                       </span>
                     </div>
 
