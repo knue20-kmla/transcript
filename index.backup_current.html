@@ -27,14 +27,14 @@
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       overflow-x: hidden;
     }
 
     /* 다크모드 */
     body.dark {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     }
 
     /* 글래스모피즘 카드 */
@@ -63,14 +63,14 @@
 
     /* 그라데이션 텍스트 */
     .gradient-text {
-      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
 
     body.dark .gradient-text {
-      background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%);
+      background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -87,27 +87,27 @@
     }
 
     ::-webkit-scrollbar-thumb {
-      background: rgba(30, 64, 175, 0.5);
+      background: rgba(102, 126, 234, 0.5);
       border-radius: 4px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: rgba(30, 64, 175, 0.8);
+      background: rgba(102, 126, 234, 0.8);
     }
 
     /* 마크다운 스타일 */
     .markdown h2 {
       font-size: 1.25rem;
       font-weight: 700;
-      color: #1e40af;
+      color: #667eea;
       margin: 1.5rem 0 0.75rem;
       padding-bottom: 0.5rem;
-      border-bottom: 2px solid rgba(30, 64, 175, 0.2);
+      border-bottom: 2px solid rgba(102, 126, 234, 0.2);
     }
 
     body.dark .markdown h2 {
-      color: #60a5fa;
-      border-bottom-color: rgba(96, 165, 250, 0.2);
+      color: #818cf8;
+      border-bottom-color: rgba(129, 140, 248, 0.2);
     }
 
     .markdown p {
@@ -155,7 +155,7 @@
       position: absolute;
       bottom: 0;
       height: 3px;
-      background: linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       border-radius: 3px 3px 0 0;
     }
@@ -172,7 +172,7 @@
 
     /* 버튼 호버 효과 */
     .btn-primary {
-      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       position: relative;
       overflow: hidden;
     }
@@ -229,8 +229,6 @@ const Icon = ({ name, size = 20, className = "" }) => {
 
 // 대시보드 탭
 const Dashboard = ({ student }) => {
-  const [achPopupOpen, setAchPopupOpen] = useState(false);
-
   const avgGrade = useMemo(() => {
     if (!student.성적 || student.성적.length === 0) return "—";
     let totalScore = 0, totalCredits = 0;
@@ -243,22 +241,7 @@ const Dashboard = ({ student }) => {
     return totalCredits > 0 ? (totalScore / totalCredits).toFixed(2) : "—";
   }, [student]);
 
-  const achSubjects = useMemo(() => {
-    return (student.성적 || []).filter(g => g.성취도);
-  }, [student]);
-
-  const achCount = achSubjects.length;
-
-  const achBreakdown = useMemo(() => {
-    const counts = { A: 0, B: 0, C: 0 };
-    achSubjects.forEach(subj => {
-      const grade = subj.성취도?.toUpperCase();
-      if (grade === 'A') counts.A++;
-      else if (grade === 'B') counts.B++;
-      else if (grade === 'C') counts.C++;
-    });
-    return counts;
-  }, [achSubjects]);
+  const achCount = student.성적?.filter(g => g.성취도).length || 0;
 
   return (
     <div className="space-y-6">
@@ -267,7 +250,7 @@ const Dashboard = ({ student }) => {
         <div className="glass rounded-3xl p-8 hover-lift smooth-transition">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">전체 평균 등급</h3>
-            <Icon name="chart" size={24} className="text-blue-500" />
+            <Icon name="chart" size={24} className="text-purple-500" />
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-5xl font-black gradient-text">{avgGrade}</span>
@@ -275,183 +258,33 @@ const Dashboard = ({ student }) => {
           </div>
         </div>
 
-        <div className="glass rounded-3xl p-8 hover-lift smooth-transition cursor-pointer" onClick={() => setAchPopupOpen(true)}>
+        <div className="glass rounded-3xl p-8 hover-lift smooth-transition">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">성취도 과목</h3>
-            <Icon name="book" size={24} className="text-blue-500" />
+            <Icon name="book" size={24} className="text-purple-500" />
           </div>
-          <div className="flex items-baseline gap-2 mb-3">
+          <div className="flex items-baseline gap-2">
             <span className="text-5xl font-black gradient-text">{achCount}</span>
             <span className="text-lg text-gray-400">과목</span>
           </div>
-          <div className="flex gap-2 flex-wrap">
-            {achBreakdown.A > 0 && (
-              <span className="text-xs font-bold px-2 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
-                A {achBreakdown.A}개
-              </span>
-            )}
-            {achBreakdown.B > 0 && (
-              <span className="text-xs font-bold px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-                B {achBreakdown.B}개
-              </span>
-            )}
-            {achBreakdown.C > 0 && (
-              <span className="text-xs font-bold px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
-                C {achBreakdown.C}개
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-gray-400 mt-3">클릭하여 상세 보기</p>
         </div>
       </div>
 
-      {/* 교과군별 등급 추이 */}
-      <div className="glass rounded-3xl p-8">
-        <h3 className="text-2xl font-bold mb-6 gradient-text flex items-center gap-2">
-          📈 교과군별 등급 추이
-        </h3>
-
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b-2 border-blue-200 dark:border-blue-800">
-                <th className="text-left py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">과목군</th>
-                <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300">1-1</th>
-                <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300">1-2</th>
-                <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300">2-1</th>
-                <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300">2-2</th>
-                <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300 w-32">추이 그래프</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { name: "국어", grades: [4, 3, null, null], subjects: ["국어", "국어", "", ""] },
-                { name: "수학", grades: [4, 5, 5, 6], subjects: ["수학", "수학", "수학Ⅰ", "수학Ⅱ"] },
-                { name: "영어", grades: [3, 3, null, null], subjects: ["영어", "영어", "", ""] },
-                { name: "사회", grades: [3, 4, null, 6], subjects: ["통사", "통사", "", "사회·문화"] },
-                { name: "과학", grades: [6, 5, 6, null], subjects: ["통과학", "통과학", "생명Ⅰ", ""] }
-              ].map((subject, idx) => {
-                const validGrades = subject.grades.map((g, i) => ({ grade: g, index: i })).filter(item => item.grade !== null);
-
-                return (
-                  <tr key={idx} className="border-b border-gray-100 dark:border-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/10 smooth-transition">
-                    <td className="py-4 px-4 font-bold text-gray-800 dark:text-gray-200">{subject.name}</td>
-                    {subject.grades.map((grade, i) => (
-                      <td key={i} className="py-4 px-4 text-center">
-                        {grade ? (
-                          <div className="flex flex-col items-center gap-1">
-                            {subject.subjects[i] && (
-                              <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400">
-                                {subject.subjects[i]}
-                              </span>
-                            )}
-                            <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold shadow-lg">
-                              {grade}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-gray-300 dark:text-gray-600">—</span>
-                        )}
-                      </td>
-                    ))}
-                    <td className="py-4 px-4">
-                      {validGrades.length > 1 ? (
-                        <svg width="100" height="40" className="mx-auto">
-                          {validGrades.map((item, i) => {
-                            if (i === 0) return null;
-                            const prev = validGrades[i - 1];
-                            const x1 = 10 + prev.index * 25;
-                            const y1 = 35 - (prev.grade - 1) * 5;
-                            const x2 = 10 + item.index * 25;
-                            const y2 = 35 - (item.grade - 1) * 5;
-                            return (
-                              <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
-                                stroke="#3b82f6" strokeWidth="2" />
-                            );
-                          })}
-                          {validGrades.map((item, i) => {
-                            const x = 10 + item.index * 25;
-                            const y = 35 - (item.grade - 1) * 5;
-                            return (
-                              <g key={i}>
-                                <circle cx={x} cy={y} r="3" fill="#3b82f6" />
-                                <text x={x} y={y - 6} fontSize="10" fill="#64748b" textAnchor="middle" fontWeight="bold">
-                                  {item.grade}
-                                </text>
-                              </g>
-                            );
-                          })}
-                        </svg>
-                      ) : (
-                        <span className="text-xs text-gray-400">—</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* 진로선택 성취도 상세 팝업 */}
-      {achPopupOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setAchPopupOpen(false)}>
-          <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-black gradient-text">진로선택 성취도 과목 상세</h3>
-              <button onClick={() => setAchPopupOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {achSubjects.length > 0 ? achSubjects.map((subj, idx) => {
-                const score = parseFloat(subj.원점수);
-                const avg = parseFloat(subj.평균);
-                const isAboveAvg = !isNaN(score) && !isNaN(avg) && score >= avg;
-                const diff = !isNaN(score) && !isNaN(avg) ? Math.abs(score - avg).toFixed(1) : null;
-
-                return (
-                  <div key={idx} className="p-5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{subj.학년} {subj.학기}</div>
-                        <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">{subj.과목}</h4>
-                      </div>
-                      <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-bold shadow-lg text-lg">
-                        {subj.성취도}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4 mb-3">
-                      <div className="text-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">원점수</div>
-                        <div className="text-xl font-black text-gray-900 dark:text-gray-100">{subj.원점수 || '—'}</div>
-                      </div>
-                      <div className="text-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">과목평균</div>
-                        <div className="text-xl font-black text-gray-600 dark:text-gray-300">{subj.평균 || '—'}</div>
-                      </div>
-                      <div className="text-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">학점</div>
-                        <div className="text-xl font-black text-gray-900 dark:text-gray-100">{subj.학점 || 3}</div>
-                      </div>
-                    </div>
-
-                    {diff && (
-                      <div className={`text-center p-3 rounded-lg ${isAboveAvg ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800' : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'}`}>
-                        <span className={`text-sm font-bold ${isAboveAvg ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
-                          {isAboveAvg ? '▲' : '▼'} {diff}점 ({isAboveAvg ? '평균 이상' : '평균 이하'})
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                );
-              }) : (
-                <div className="text-center py-12 text-gray-400">성취도 과목 데이터가 없습니다.</div>
-              )}
-            </div>
+      {/* 하이라이트 */}
+      {student.highlights && student.highlights.length > 0 && (
+        <div className="glass rounded-3xl p-8">
+          <h3 className="text-lg font-bold mb-6 gradient-text flex items-center gap-2">
+            <span>⭐</span> 주요 세특 평가 표현
+          </h3>
+          <div className="space-y-4">
+            {student.highlights.map((h, i) => (
+              <div key={i} className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-5 border-l-4 border-purple-500 hover-lift smooth-transition">
+                <p className="text-gray-800 dark:text-gray-200 font-semibold mb-2 leading-relaxed">"{h.text}"</p>
+                <span className="inline-block px-3 py-1 bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-purple-200 text-xs font-bold rounded-full">
+                  {h.subject}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -497,7 +330,7 @@ const Grades = ({ student }) => {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b-2 border-blue-200 dark:border-blue-800">
+            <tr className="border-b-2 border-purple-200 dark:border-purple-800">
               <th className="text-left py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">과목</th>
               <th className="text-center py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">학점</th>
               <th className="text-right py-4 px-4 text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">원점수</th>
@@ -507,14 +340,14 @@ const Grades = ({ student }) => {
           </thead>
           <tbody>
             {filtered.length > 0 ? filtered.map((g, i) => (
-              <tr key={i} className="border-b border-gray-100 dark:border-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/10 smooth-transition">
+              <tr key={i} className="border-b border-gray-100 dark:border-gray-800 hover:bg-purple-50 dark:hover:bg-purple-900/10 smooth-transition">
                 <td className="py-4 px-4 font-semibold text-gray-800 dark:text-gray-200">{g.과목}</td>
                 <td className="py-4 px-4 text-center text-gray-600 dark:text-gray-400">{g.학점 || 3}</td>
                 <td className="py-4 px-4 text-right font-semibold text-gray-800 dark:text-gray-200">{g.원점수 || '—'}</td>
                 <td className="py-4 px-4 text-right text-gray-500 dark:text-gray-400">{g.평균 || '—'}</td>
                 <td className="py-4 px-4 text-center">
                   {g.등급 ? (
-                    <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold shadow-lg">
+                    <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold shadow-lg">
                       {g.등급}
                     </span>
                   ) : g.성취도 ? (
@@ -539,21 +372,10 @@ const Seteuk = ({ studentName, subject, setSubject }) => {
   const [mdContent, setMdContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [openSections, setOpenSections] = useState({});
-  const [studentData, setStudentData] = useState(null);
-
-  useEffect(() => {
-    fetch(`${DATA_BASE}students.json`)
-      .then(res => res.json())
-      .then(data => {
-        const student = data.students.find(s => s.이름 === studentName);
-        setStudentData(student);
-      })
-      .catch(err => console.error(err));
-  }, [studentName]);
 
   useEffect(() => {
     if (subject === "전체 분석") return;
-
+    
     setLoading(true);
     fetch(`${GITHUB_BASE}${studentName}_세특_${subject}.md`)
       .then(res => res.text())
@@ -576,19 +398,11 @@ const Seteuk = ({ studentName, subject, setSubject }) => {
     });
   }, [mdContent]);
 
-  const subjectGroups = ["국어", "영어", "수학", "과학", "사회", "정보", "제2외국어", "교양"];
-
   return (
     <div className="space-y-6">
       <div className="glass rounded-3xl p-6">
         <div className="flex flex-wrap gap-3">
-          <button onClick={() => setSubject("전체 분석")}
-            className={`px-5 py-2.5 rounded-full text-sm font-bold smooth-transition ${
-              subject === "전체 분석" ? 'btn-primary text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-            }`}>
-            전체 분석
-          </button>
-          {subjectGroups.map(s => (
+          {["전체 분석", "국어", "영어", "수학", "과학", "사회", "정보", "교양"].map(s => (
             <button key={s} onClick={() => setSubject(s)}
               className={`px-5 py-2.5 rounded-full text-sm font-bold smooth-transition ${
                 subject === s ? 'btn-primary text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
@@ -600,85 +414,25 @@ const Seteuk = ({ studentName, subject, setSubject }) => {
       </div>
 
       {subject === "전체 분석" ? (
-        <div className="space-y-6">
-          <div className="glass rounded-3xl p-8">
-            <h3 className="text-2xl font-bold gradient-text mb-6 flex items-center gap-2">
-              <Icon name="book" size={28} />
-              과목군별 종합역량 분석
-            </h3>
-
-            {studentData?.세특종합분석 ? (
-              <div className="grid gap-6">
-                {Object.entries(studentData.세특종합분석).map(([subjectGroup, analysis]) => (
-                  <div key={subjectGroup} className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-2xl p-6 border-l-4 border-blue-500 hover-lift smooth-transition">
-                    <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">{subjectGroup}</h4>
-
-                    {analysis.핵심역량 && (
-                      <div className="mb-4">
-                        <div className="text-sm font-bold text-blue-600 dark:text-blue-400 mb-2">핵심역량</div>
-                        <div className="flex flex-wrap gap-2">
-                          {analysis.핵심역량.map((역량, idx) => (
-                            <span key={idx} className="px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 text-sm font-semibold rounded-full">
-                              {역량}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {analysis.주요평가 && (
-                      <div className="mb-4">
-                        <div className="text-sm font-bold text-blue-600 dark:text-blue-400 mb-2">주요평가</div>
-                        <ul className="space-y-2">
-                          {analysis.주요평가.map((평가, idx) => (
-                            <li key={idx} className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed flex items-start gap-2">
-                              <span className="text-blue-500 mt-1">•</span>
-                              <span>{평가}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {analysis.발전가능성 && (
-                      <div>
-                        <div className="text-sm font-bold text-blue-600 dark:text-blue-400 mb-2">발전가능성</div>
-                        <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                          {analysis.발전가능성}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-8">종합역량 분석 데이터가 없습니다.</p>
-            )}
-          </div>
-
-          <div className="glass rounded-3xl p-8">
-            <h3 className="text-lg font-bold text-gray-600 dark:text-gray-400 mb-2">과목별 세부 기록</h3>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">상단에서 과목군을 선택하여 상세 기록을 확인하세요.</p>
-          </div>
+        <div className="glass rounded-3xl p-8">
+          <h3 className="text-xl font-bold gradient-text mb-4">전체 분석</h3>
+          <p className="text-gray-600 dark:text-gray-400">각 과목을 선택하여 상세 기록을 확인하세요.</p>
         </div>
       ) : loading ? (
         <div className="glass rounded-3xl p-12 text-center">
           <div className="animate-pulse text-gray-400">로딩 중...</div>
         </div>
       ) : sections.length > 0 ? (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {sections.slice(1).map((sec, idx) => (
-            <div key={idx} className="glass rounded-2xl overflow-hidden hover-lift">
+            <div key={idx} className="glass rounded-2xl overflow-hidden">
               <button onClick={() => setOpenSections(prev => ({ ...prev, [idx]: !prev[idx] }))}
-                className="w-full p-6 flex items-center justify-between hover:bg-gradient-to-r hover:from-blue-50 hover:to-transparent dark:hover:from-blue-900/20 dark:hover:to-transparent smooth-transition">
-                <div className="flex items-center gap-3">
-                  <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full"></div>
-                  <span className="font-bold text-gray-800 dark:text-gray-200 text-lg">{sec.title}</span>
-                </div>
+                className="w-full p-5 flex items-center justify-between hover:bg-purple-50 dark:hover:bg-purple-900/20 smooth-transition">
+                <span className="font-bold text-gray-800 dark:text-gray-200">📌 {sec.title}</span>
                 <Icon name="chevronDown" className={`text-gray-400 smooth-transition ${openSections[idx] ? 'rotate-180' : ''}`} />
               </button>
               <div className={`accordion-content ${openSections[idx] ? 'open' : ''}`}>
-                <div className="px-6 pb-6 markdown" dangerouslySetInnerHTML={{ __html: marked.parse(sec.content) }} />
+                <div className="p-6 markdown" dangerouslySetInnerHTML={{ __html: marked.parse(sec.content) }} />
               </div>
             </div>
           ))}
@@ -745,8 +499,8 @@ function App() {
         <header className="glass rounded-3xl p-6 mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-lg p-1">
-                <img src="https://i.imgur.com/Mo4ogKc.png" alt="KMLA Logo" className="w-full h-full object-contain" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-black text-xl shadow-lg">
+                K
               </div>
               <div>
                 <h1 className="text-2xl md:text-3xl font-black gradient-text">KMLA Transcript</h1>
@@ -763,7 +517,7 @@ function App() {
 
               {/* 학생 선택 */}
               <select value={selectedStudent} onChange={e => setSelectedStudent(e.target.value)}
-                className="px-6 py-2.5 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold text-sm border-none outline-none cursor-pointer shadow-lg hover:shadow-xl smooth-transition">
+                className="px-6 py-2.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-sm border-none outline-none cursor-pointer shadow-lg hover:shadow-xl smooth-transition">
                 {students.map(s => (
                   <option key={s.이름} value={s.이름}>{s.이름}</option>
                 ))}
@@ -776,7 +530,7 @@ function App() {
           {/* 프로필 카드 */}
           <div className="lg:col-span-1">
             <div className="glass rounded-3xl p-8 text-center hover-lift smooth-transition">
-              <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-500 p-1 shadow-xl">
+              <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 p-1 shadow-xl">
                 <div className="w-full h-full rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                   {currentStudent.프로필이미지URL ? (
                     <img src={currentStudent.프로필이미지URL} alt={selectedStudent} className="w-full h-full object-cover" />
@@ -789,7 +543,7 @@ function App() {
               </div>
 
               <h2 className="text-2xl font-black mb-2 gradient-text">{selectedStudent}</h2>
-              <p className="text-sm text-blue-500 dark:text-blue-400 font-bold mb-6">{currentStudent.계열 || '인문사회계열'}</p>
+              <p className="text-sm text-purple-500 dark:text-purple-400 font-bold mb-6">{currentStudent.계열 || '인문사회계열'}</p>
 
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
@@ -802,25 +556,6 @@ function App() {
                 </div>
               </div>
             </div>
-
-            {/* 주요 세특 평가 표현 */}
-            {currentStudent.highlights && currentStudent.highlights.length > 0 && (
-              <div className="glass rounded-3xl p-6 mt-6">
-                <h3 className="text-sm font-bold mb-4 gradient-text flex items-center gap-2">
-                  <span>⭐</span> 주요 세특 평가 표현
-                </h3>
-                <div className="space-y-3">
-                  {currentStudent.highlights.map((h, i) => (
-                    <div key={i} className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-4 border-l-4 border-blue-500">
-                      <p className="text-gray-800 dark:text-gray-200 font-semibold text-xs mb-2 leading-relaxed">"{h.text}"</p>
-                      <span className="inline-block px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 text-[10px] font-bold rounded-full">
-                        {h.subject}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* 메인 컨텐츠 */}
@@ -831,7 +566,7 @@ function App() {
                 {tabs.map(tab => (
                   <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                     className={`flex-1 px-6 py-3 rounded-2xl text-sm font-bold smooth-transition flex items-center justify-center gap-2 ${
-                      activeTab === tab.id ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      activeTab === tab.id ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                     }`}>
                     <Icon name={tab.icon} size={18} />
                     <span>{tab.name}</span>

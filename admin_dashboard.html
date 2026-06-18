@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리자 대시보드 - KMLA Transcript</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+    }
+  </style>
+</head>
+<body class="min-h-screen p-6">
+
+  <!-- 상단 헤더 -->
+  <div class="max-w-6xl mx-auto mb-6">
+    <div class="bg-white rounded-3xl shadow-lg p-6 flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-black text-gray-800">📊 관리자 대시보드</h1>
+        <p class="text-sm text-gray-500 mt-1">환영합니다, <span id="adminName" class="font-bold text-blue-600"></span>님</p>
+      </div>
+      <div class="flex gap-3">
+        <a href="index.html" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl font-semibold text-gray-700 transition-colors">
+          📚 메인 페이지
+        </a>
+        <button id="logoutBtn" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-colors">
+          🚪 로그아웃
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 메인 컨텐츠 -->
+  <div class="max-w-6xl mx-auto">
+
+    <!-- PDF 업로드 섹션 -->
+    <div class="bg-white rounded-3xl shadow-lg p-8 mb-6">
+      <h2 class="text-xl font-black text-gray-800 mb-4">📤 생기부 PDF 업로드</h2>
+      <p class="text-gray-600 mb-6">학생 생기부 PDF를 업로드하면 자동으로 파싱하여 시스템에 추가됩니다.</p>
+
+      <!-- 드래그 앤 드롭 영역 -->
+      <div id="dropZone" class="border-4 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:border-blue-500 transition-colors cursor-pointer">
+        <div class="mb-4">
+          <span class="text-6xl">📄</span>
+        </div>
+        <p class="text-lg font-bold text-gray-700 mb-2">PDF 파일을 드래그하거나 클릭하세요</p>
+        <p class="text-sm text-gray-500">또는</p>
+        <input type="file" id="fileInput" accept=".pdf" class="hidden" />
+        <button onclick="document.getElementById('fileInput').click()" class="mt-4 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl transition-colors">
+          파일 선택
+        </button>
+      </div>
+
+      <!-- 업로드 진행 상황 -->
+      <div id="uploadProgress" class="hidden mt-6">
+        <div class="bg-gray-100 rounded-xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-semibold text-gray-700" id="progressText">업로드 중...</span>
+            <span class="text-sm text-gray-500" id="progressPercent">0%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+            <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+          <div id="progressLog" class="mt-4 space-y-2 text-sm">
+            <!-- 진행 로그가 여기 표시됩니다 -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 성공/오류 메시지 -->
+      <div id="resultMsg" class="hidden mt-6"></div>
+    </div>
+
+    <!-- 현재 학생 목록 -->
+    <div class="bg-white rounded-3xl shadow-lg p-8">
+      <h2 class="text-xl font-black text-gray-800 mb-4">👥 등록된 학생 목록</h2>
+      <div id="studentList" class="space-y-3">
+        <div class="text-gray-400 text-center py-8">로딩 중...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // 로그인 확인
+    if (!sessionStorage.getItem('admin_logged_in')) {
+      window.location.href = 'login.html';
+    }
+
+    // 관리자 이름 표시
+    document.getElementById('adminName').textContent = sessionStorage.getItem('admin_username') || 'Admin';
+
+    // 로그아웃
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      sessionStorage.removeItem('admin_logged_in');
+      sessionStorage.removeItem('admin_username');
+      window.location.href = 'login.html';
+    });
+
+    // 학생 목록 로드
+    async function loadStudentList() {
+      try {
+        const response = await fetch('data/students.json');
+        const data = await response.json();
+        const students = data.students || [];
+
+        const listEl = document.getElementById('studentList');
+        if (students.length === 0) {
+          listEl.innerHTML = '<div class="text-gray-400 text-center py-8">등록된 학생이 없습니다.</div>';
+          return;
+        }
+
+        listEl.innerHTML = students.map((s, i) => `
+          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                ${i + 1}
+              </div>
+              <div>
+                <div class="font-bold text-gray-800">${s.이름}</div>
+                <div class="text-sm text-gray-500">${s.학년}학년 ${s.반}반 ${s.번호}번 | ${s.계열}</div>
+              </div>
+            </div>
+            <div class="text-sm text-gray-400">
+              성적 ${(s.성적 || []).length}개
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('학생 목록 로드 실패:', error);
+        document.getElementById('studentList').innerHTML = '<div class="text-red-500 text-center py-8">학생 목록을 불러오는데 실패했습니다.</div>';
+      }
+    }
+
+    loadStudentList();
+
+    // 드래그 앤 드롭
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('border-blue-500', 'bg-blue-50');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleFile(files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    // 파일 처리
+    async function handleFile(file) {
+      if (!file.name.endsWith('.pdf')) {
+        showError('PDF 파일만 업로드 가능합니다.');
+        return;
+      }
+
+      const progressDiv = document.getElementById('uploadProgress');
+      const resultMsg = document.getElementById('resultMsg');
+
+      progressDiv.classList.remove('hidden');
+      resultMsg.classList.add('hidden');
+
+      updateProgress(10, '파일 업로드 중...', 'PDF 파일을 서버로 전송하고 있습니다.');
+
+      // FormData 생성
+      const formData = new FormData();
+      formData.append('pdf', file);
+
+      try {
+        updateProgress(30, 'PDF 파싱 중...', 'Solar Pro API로 PDF를 분석하고 있습니다.');
+
+        // Python 백엔드로 전송 (v2)
+        const response = await fetch('http://localhost:5001/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error('업로드 실패');
+        }
+
+        const result = await response.json();
+
+        updateProgress(60, '데이터 처리 중...', 'JSON 데이터와 마크다운 파일을 생성하고 있습니다.');
+
+        // 성공
+        updateProgress(100, '완료!', `${result.student_name} 학생의 데이터가 성공적으로 추가되었습니다.`);
+
+        setTimeout(() => {
+          showSuccess(`✅ ${result.student_name} 학생 추가 완료!`);
+          progressDiv.classList.add('hidden');
+          loadStudentList(); // 목록 새로고침
+        }, 1000);
+
+      } catch (error) {
+        console.error('업로드 오류:', error);
+        showError('업로드에 실패했습니다. Python 백엔드 서버가 실행 중인지 확인하세요.');
+        progressDiv.classList.add('hidden');
+      }
+    }
+
+    function updateProgress(percent, text, log) {
+      document.getElementById('progressBar').style.width = percent + '%';
+      document.getElementById('progressPercent').textContent = percent + '%';
+      document.getElementById('progressText').textContent = text;
+
+      const logEl = document.getElementById('progressLog');
+      const timestamp = new Date().toLocaleTimeString();
+      logEl.innerHTML += `<div class="text-gray-600"><span class="font-mono text-xs text-gray-400">[${timestamp}]</span> ${log}</div>`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function showError(message) {
+      const resultMsg = document.getElementById('resultMsg');
+      resultMsg.className = 'mt-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl';
+      resultMsg.textContent = '❌ ' + message;
+      resultMsg.classList.remove('hidden');
+    }
+
+    function showSuccess(message) {
+      const resultMsg = document.getElementById('resultMsg');
+      resultMsg.className = 'mt-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl font-bold';
+      resultMsg.textContent = message;
+      resultMsg.classList.remove('hidden');
+    }
+  </script>
+
+</body>
+</html>
