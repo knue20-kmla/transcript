@@ -122,6 +122,113 @@ def get_students():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/students/<student_name>', methods=['DELETE'])
+def delete_student(student_name):
+    """학생 삭제"""
+    try:
+        json_path = os.path.join(os.path.dirname(__file__), 'data', 'students.json')
+
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        # 학생 찾기
+        student = next((s for s in data['students'] if s['이름'] == student_name), None)
+        if not student:
+            return jsonify({'error': '학생을 찾을 수 없습니다'}), 404
+
+        # students.json에서 제거
+        data['students'] = [s for s in data['students'] if s['이름'] != student_name]
+
+        with open(json_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+        print(f"✅ {student_name} 학생 JSON에서 삭제")
+
+        # 마크다운 파일 삭제
+        markdown_dir = os.path.join(os.path.dirname(__file__), 'markdown')
+        deleted_files = []
+        for filename in os.listdir(markdown_dir):
+            if filename.startswith(f'{student_name}_'):
+                filepath = os.path.join(markdown_dir, filename)
+                os.remove(filepath)
+                deleted_files.append(filename)
+                print(f"✅ {filename} 삭제")
+
+        # PDF 파일 삭제 (있다면)
+        pdf_path = os.path.join(UPLOAD_FOLDER, f'{student_name}.pdf')
+        if os.path.exists(pdf_path):
+            os.remove(pdf_path)
+            print(f"✅ {student_name}.pdf 삭제")
+
+        # Git 커밋
+        print("🔄 Git 커밋 중...")
+        subprocess.run(['git', 'add', 'data/students.json', 'markdown/', 'pdfs/'],
+                      capture_output=True, check=False)
+        subprocess.run(['git', 'commit', '-m',
+                       f'🗑️ {student_name} 학생 삭제\n\nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>'],
+                      capture_output=True, check=False)
+        subprocess.run(['git', 'push'], capture_output=True, check=False)
+        print("✅ Git 푸시 완료")
+
+        return jsonify({
+            'success': True,
+            'message': f'{student_name} 학생이 삭제되었습니다.',
+            'deleted_files': deleted_files
+        })
+
+    except Exception as e:
+        print(f"❌ 오류 발생: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/students/<student_name>/photo', methods=['PUT'])
+def update_student_photo(student_name):
+    """학생 프로필 사진 URL 업데이트"""
+    try:
+        photo_url = request.json.get('photo_url', '')
+
+        json_path = os.path.join(os.path.dirname(__file__), 'data', 'students.json')
+
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        # 학생 찾기
+        student = next((s for s in data['students'] if s['이름'] == student_name), None)
+        if not student:
+            return jsonify({'error': '학생을 찾을 수 없습니다'}), 404
+
+        # 프로필 이미지 URL 업데이트
+        student['프로필이미지URL'] = photo_url
+
+        with open(json_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+        print(f"✅ {student_name} 학생 프로필 사진 업데이트")
+
+        # Git 커밋
+        print("🔄 Git 커밋 중...")
+        subprocess.run(['git', 'add', 'data/students.json'],
+                      capture_output=True, check=False)
+        subprocess.run(['git', 'commit', '-m',
+                       f'📸 {student_name} 학생 프로필 사진 업데이트\n\nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>'],
+                      capture_output=True, check=False)
+        subprocess.run(['git', 'push'], capture_output=True, check=False)
+        print("✅ Git 푸시 완료")
+
+        return jsonify({
+            'success': True,
+            'message': f'{student_name} 학생 프로필 사진이 업데이트되었습니다.'
+        })
+
+    except Exception as e:
+        print(f"❌ 오류 발생: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/health', methods=['GET'])
 def health_check():
     """서버 상태 확인"""

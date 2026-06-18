@@ -115,16 +115,23 @@
         listEl.innerHTML = students.map((s, i) => `
           <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
             <div class="flex items-center gap-4">
-              <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                ${i + 1}
+              <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold overflow-hidden">
+                ${s.프로필이미지URL ? `<img src="${s.프로필이미지URL}" class="w-full h-full object-cover" />` : (i + 1)}
               </div>
               <div>
                 <div class="font-bold text-gray-800">${s.이름}</div>
                 <div class="text-sm text-gray-500">${s.학년}학년 ${s.반}반 ${s.번호}번 | ${s.계열}</div>
               </div>
             </div>
-            <div class="text-sm text-gray-400">
-              성적 ${(s.성적 || []).length}개
+            <div class="flex items-center gap-2">
+              <button onclick="editPhoto('${s.이름}', '${s.프로필이미지URL || ''}')"
+                class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-lg transition-colors">
+                📸 사진
+              </button>
+              <button onclick="deleteStudent('${s.이름}')"
+                class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-lg transition-colors">
+                🗑️ 삭제
+              </button>
             </div>
           </div>
         `).join('');
@@ -135,6 +142,53 @@
     }
 
     loadStudentList();
+
+    // 학생 프로필 사진 수정
+    function editPhoto(studentName, currentUrl) {
+      const newUrl = prompt(`${studentName} 학생 프로필 사진 URL 입력:`, currentUrl);
+      if (newUrl === null) return; // 취소
+
+      fetch(`http://localhost:5001/students/${encodeURIComponent(studentName)}/photo`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photo_url: newUrl })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert(`✅ ${data.message}`);
+          loadStudentList();
+        } else {
+          alert(`❌ 오류: ${data.error}`);
+        }
+      })
+      .catch(err => {
+        alert(`❌ 오류: ${err.message}`);
+      });
+    }
+
+    // 학생 삭제
+    function deleteStudent(studentName) {
+      if (!confirm(`⚠️ ${studentName} 학생을 삭제하시겠습니까?\n\n- students.json에서 삭제\n- 마크다운 파일 삭제\n- PDF 파일 삭제\n- Git 커밋 및 푸시\n\n이 작업은 되돌릴 수 없습니다!`)) {
+        return;
+      }
+
+      fetch(`http://localhost:5001/students/${encodeURIComponent(studentName)}`, {
+        method: 'DELETE'
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert(`✅ ${data.message}\n\n삭제된 파일:\n${data.deleted_files.join('\n')}`);
+          loadStudentList();
+        } else {
+          alert(`❌ 오류: ${data.error}`);
+        }
+      })
+      .catch(err => {
+        alert(`❌ 오류: ${err.message}`);
+      });
+    }
 
     // 드래그 앤 드롭
     const dropZone = document.getElementById('dropZone');
