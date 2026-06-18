@@ -252,6 +252,10 @@ const Dashboard = ({ student }) => {
       const 성취도 = g.성취도?.toString() || '';
       // P 성취도 제외
       if (성취도.startsWith('P')) return false;
+      // 예체능 과목 제외
+      const 과목 = g.과목 || '';
+      const 예체능과목 = ['음악', '미술', '체육', '미술창작', '음악감상과 비평', '체육과 건강'];
+      if (예체능과목.some(subject => 과목.includes(subject))) return false;
       // A, B, C 성취도만 포함 (괄호와 숫자 제거 후 확인)
       const cleanGrade = 성취도.replace(/\(.*?\)/g, '').trim().toUpperCase();
       return ['A', 'B', 'C'].includes(cleanGrade);
