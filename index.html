@@ -539,10 +539,21 @@ const Seteuk = ({ studentName, subject, setSubject }) => {
   const [mdContent, setMdContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [openSections, setOpenSections] = useState({});
+  const [studentData, setStudentData] = useState(null);
+
+  useEffect(() => {
+    fetch(`${DATA_BASE}students.json`)
+      .then(res => res.json())
+      .then(data => {
+        const student = data.students.find(s => s.이름 === studentName);
+        setStudentData(student);
+      })
+      .catch(err => console.error(err));
+  }, [studentName]);
 
   useEffect(() => {
     if (subject === "전체 분석") return;
-    
+
     setLoading(true);
     fetch(`${GITHUB_BASE}${studentName}_세특_${subject}.md`)
       .then(res => res.text())
@@ -565,11 +576,19 @@ const Seteuk = ({ studentName, subject, setSubject }) => {
     });
   }, [mdContent]);
 
+  const subjectGroups = ["국어", "영어", "수학", "과학", "사회", "정보", "교양"];
+
   return (
     <div className="space-y-6">
       <div className="glass rounded-3xl p-6">
         <div className="flex flex-wrap gap-3">
-          {["전체 분석", "국어", "영어", "수학", "과학", "사회", "정보", "교양"].map(s => (
+          <button onClick={() => setSubject("전체 분석")}
+            className={`px-5 py-2.5 rounded-full text-sm font-bold smooth-transition ${
+              subject === "전체 분석" ? 'btn-primary text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+            }`}>
+            전체 분석
+          </button>
+          {subjectGroups.map(s => (
             <button key={s} onClick={() => setSubject(s)}
               className={`px-5 py-2.5 rounded-full text-sm font-bold smooth-transition ${
                 subject === s ? 'btn-primary text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
@@ -581,25 +600,85 @@ const Seteuk = ({ studentName, subject, setSubject }) => {
       </div>
 
       {subject === "전체 분석" ? (
-        <div className="glass rounded-3xl p-8">
-          <h3 className="text-xl font-bold gradient-text mb-4">전체 분석</h3>
-          <p className="text-gray-600 dark:text-gray-400">각 과목을 선택하여 상세 기록을 확인하세요.</p>
+        <div className="space-y-6">
+          <div className="glass rounded-3xl p-8">
+            <h3 className="text-2xl font-bold gradient-text mb-6 flex items-center gap-2">
+              <Icon name="book" size={28} />
+              과목군별 종합역량 분석
+            </h3>
+
+            {studentData?.세특종합분석 ? (
+              <div className="grid gap-6">
+                {Object.entries(studentData.세특종합분석).map(([subjectGroup, analysis]) => (
+                  <div key={subjectGroup} className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-2xl p-6 border-l-4 border-blue-500 hover-lift smooth-transition">
+                    <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">{subjectGroup}</h4>
+
+                    {analysis.핵심역량 && (
+                      <div className="mb-4">
+                        <div className="text-sm font-bold text-blue-600 dark:text-blue-400 mb-2">핵심역량</div>
+                        <div className="flex flex-wrap gap-2">
+                          {analysis.핵심역량.map((역량, idx) => (
+                            <span key={idx} className="px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 text-sm font-semibold rounded-full">
+                              {역량}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {analysis.주요평가 && (
+                      <div className="mb-4">
+                        <div className="text-sm font-bold text-blue-600 dark:text-blue-400 mb-2">주요평가</div>
+                        <ul className="space-y-2">
+                          {analysis.주요평가.map((평가, idx) => (
+                            <li key={idx} className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed flex items-start gap-2">
+                              <span className="text-blue-500 mt-1">•</span>
+                              <span>{평가}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {analysis.발전가능성 && (
+                      <div>
+                        <div className="text-sm font-bold text-blue-600 dark:text-blue-400 mb-2">발전가능성</div>
+                        <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                          {analysis.발전가능성}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 dark:text-gray-400 text-center py-8">종합역량 분석 데이터가 없습니다.</p>
+            )}
+          </div>
+
+          <div className="glass rounded-3xl p-8">
+            <h3 className="text-lg font-bold text-gray-600 dark:text-gray-400 mb-2">과목별 세부 기록</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">상단에서 과목군을 선택하여 상세 기록을 확인하세요.</p>
+          </div>
         </div>
       ) : loading ? (
         <div className="glass rounded-3xl p-12 text-center">
           <div className="animate-pulse text-gray-400">로딩 중...</div>
         </div>
       ) : sections.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {sections.slice(1).map((sec, idx) => (
-            <div key={idx} className="glass rounded-2xl overflow-hidden">
+            <div key={idx} className="glass rounded-2xl overflow-hidden hover-lift">
               <button onClick={() => setOpenSections(prev => ({ ...prev, [idx]: !prev[idx] }))}
-                className="w-full p-5 flex items-center justify-between hover:bg-blue-50 dark:hover:bg-blue-900/20 smooth-transition">
-                <span className="font-bold text-gray-800 dark:text-gray-200">📌 {sec.title}</span>
+                className="w-full p-6 flex items-center justify-between hover:bg-gradient-to-r hover:from-blue-50 hover:to-transparent dark:hover:from-blue-900/20 dark:hover:to-transparent smooth-transition">
+                <div className="flex items-center gap-3">
+                  <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full"></div>
+                  <span className="font-bold text-gray-800 dark:text-gray-200 text-lg">{sec.title}</span>
+                </div>
                 <Icon name="chevronDown" className={`text-gray-400 smooth-transition ${openSections[idx] ? 'rotate-180' : ''}`} />
               </button>
               <div className={`accordion-content ${openSections[idx] ? 'open' : ''}`}>
-                <div className="p-6 markdown" dangerouslySetInnerHTML={{ __html: marked.parse(sec.content) }} />
+                <div className="px-6 pb-6 markdown" dangerouslySetInnerHTML={{ __html: marked.parse(sec.content) }} />
               </div>
             </div>
           ))}
