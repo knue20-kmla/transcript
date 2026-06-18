@@ -271,6 +271,36 @@ const Dashboard = ({ student }) => {
     return counts;
   }, [achSubjects]);
 
+  // 교과군별 등급 추이 데이터 생성
+  const gradesTrends = useMemo(() => {
+    const subjectGroupMap = {
+      '국어': ['국어', '현대문학 감상', '고전문학 감상', '한국 문학과 세계 문학', '생각하는 삶', '언어와 매체'],
+      '수학': ['수학', '수학I', '수학II', 'AP 통계학', '수학적 사고와 통계', '수학Ⅰ', '수학Ⅱ'],
+      '영어': ['영어', '영국 문학 I', '영국 문학 II', '영국 문학Ⅰ', '영국 문학Ⅱ', '세계 문학 I', '세계 문학 II'],
+      '사회': ['통합사회', '정치와 법', '한국사', '사회·문화', '국제 관계와 국제기구', 'AP 심리학', '비교정치', '정치학개론', 'AP 미시경제', 'AP 거시경제', '철학 I', '경제', 'AP 미국사 I'],
+      '과학': ['통합과학', '과학탐구실험', 'Biology I', 'AP 생물학I', '생명과학Ⅰ', '생명과학Ⅱ', '화학I'],
+      '제2외국어': ['스페인어 I', '스페인어Ⅰ', '스페인어Ⅱ', '스페인어II', '프랑스어 I', '프랑스어Ⅰ', '프랑스어Ⅱ', '중국어 I', '중국어Ⅰ', '중국어Ⅱ', '한문', '한문Ⅰ', '한문Ⅱ']
+    };
+
+    const periods = ['1학년 1학기', '1학년 2학기', '2학년 1학기', '2학년 2학기'];
+
+    return Object.entries(subjectGroupMap).map(([groupName, subjects]) => {
+      const grades = [];
+      const subjectNames = [];
+
+      periods.forEach(period => {
+        const [학년, 학기] = period.split(' ');
+        const found = (student.성적 || []).find(g =>
+          g.학년 === 학년 && g.학기 === 학기 && subjects.includes(g.과목) && g.등급
+        );
+        grades.push(found ? found.등급 : null);
+        subjectNames.push(found ? found.과목.replace(/[^가-힣a-zA-Z0-9]/g, '').substring(0, 5) : '');
+      });
+
+      return { name: groupName, grades, subjects: subjectNames };
+    }).filter(item => item.grades.some(g => g !== null)); // 데이터가 있는 과목군만 표시
+  }, [student]);
+
   return (
     <div className="space-y-6">
       {/* 통계 카드 */}
@@ -335,13 +365,7 @@ const Dashboard = ({ student }) => {
               </tr>
             </thead>
             <tbody>
-              {[
-                { name: "국어", grades: [4, 3, null, null], subjects: ["국어", "국어", "", ""] },
-                { name: "수학", grades: [4, 5, 5, 6], subjects: ["수학", "수학", "수학Ⅰ", "수학Ⅱ"] },
-                { name: "영어", grades: [3, 3, null, null], subjects: ["영어", "영어", "", ""] },
-                { name: "사회", grades: [3, 4, null, 6], subjects: ["통사", "통사", "", "사회·문화"] },
-                { name: "과학", grades: [6, 5, 6, null], subjects: ["통과학", "통과학", "생명Ⅰ", ""] }
-              ].map((subject, idx) => {
+              {gradesTrends.map((subject, idx) => {
                 const validGrades = subject.grades.map((g, i) => ({ grade: g, index: i })).filter(item => item.grade !== null);
 
                 return (
