@@ -739,7 +739,7 @@ const Career = ({ studentName }) => {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`${DATA_BASE}markdown/${studentName}_진로활동.md`)
+    fetch(`${GITHUB_BASE}${studentName}_진로활동.md`)
       .then(res => res.text())
       .then(text => {
         setMarkdown(text);
@@ -769,7 +769,7 @@ const Autonomy = ({ studentName }) => {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`${DATA_BASE}markdown/${studentName}_자율활동.md`)
+    fetch(`${GITHUB_BASE}${studentName}_자율활동.md`)
       .then(res => res.text())
       .then(text => {
         setMarkdown(text);
@@ -799,7 +799,7 @@ const Behavior = ({ studentName }) => {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`${DATA_BASE}markdown/${studentName}_행동특성.md`)
+    fetch(`${GITHUB_BASE}${studentName}_행동특성.md`)
       .then(res => res.text())
       .then(text => {
         setMarkdown(text);
