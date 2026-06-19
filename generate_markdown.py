@@ -109,7 +109,7 @@ def generate_seteuk_markdown(student, student_name):
 
 def generate_career_markdown(student, student_name):
     """진로활동 마크다운 생성"""
-    md_content = "# 진로활동\n\n"
+    md_content = ""  # H1 제목 제거
 
     진로활동 = student.get('진로활동', {})
 
@@ -134,7 +134,7 @@ def generate_career_markdown(student, student_name):
             if 내용:
                 md_content += f"### {학년}\n\n{내용}\n\n"
 
-    if len(md_content) > 20:  # 내용이 있으면
+    if len(md_content) > 10:  # 내용이 있으면
         filename = f"markdown/{student_name}_진로활동.md"
         with open(filename, 'w', encoding='utf-8') as f:
             f.write(md_content)
@@ -142,7 +142,7 @@ def generate_career_markdown(student, student_name):
 
 def generate_autonomy_markdown(student, student_name):
     """자율활동 마크다운 생성"""
-    md_content = "# 자율활동\n\n"
+    md_content = ""  # H1 제목 제거
 
     자율활동 = student.get('자율활동', [])
 
@@ -154,7 +154,7 @@ def generate_autonomy_markdown(student, student_name):
             if 내용:
                 md_content += f"### {학년}\n\n{내용}\n\n"
 
-    if len(md_content) > 20:  # 내용이 있으면
+    if len(md_content) > 10:  # 내용이 있으면
         filename = f"markdown/{student_name}_자율활동.md"
         with open(filename, 'w', encoding='utf-8') as f:
             f.write(md_content)
@@ -162,7 +162,7 @@ def generate_autonomy_markdown(student, student_name):
 
 def generate_behavior_markdown(student, student_name):
     """행동특성 마크다운 생성"""
-    md_content = "# 행동특성 및 종합의견\n\n"
+    md_content = ""  # H1 제목 제거
 
     행동특성 = student.get('행동특성', [])
 
@@ -173,7 +173,7 @@ def generate_behavior_markdown(student, student_name):
             if 내용:
                 md_content += f"## {학년}\n\n{내용}\n\n"
 
-    if len(md_content) > 30:  # 내용이 있으면
+    if len(md_content) > 10:  # 내용이 있으면
         filename = f"markdown/{student_name}_행동특성.md"
         with open(filename, 'w', encoding='utf-8') as f:
             f.write(md_content)
