@@ -170,6 +170,72 @@
       animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
 
+    /* 마크다운 콘텐츠 스타일링 */
+    .markdown-content {
+      line-height: 1.8;
+      color: #374151;
+    }
+
+    .dark .markdown-content {
+      color: #e5e7eb;
+    }
+
+    .markdown-content h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .dark .markdown-content h2 {
+      border-bottom-color: #374151;
+    }
+
+    .markdown-content h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .dark .markdown-content h3 {
+      color: #f3f4f6;
+    }
+
+    .markdown-content h3:before {
+      content: "📌";
+      font-size: 1rem;
+    }
+
+    .markdown-content p {
+      margin-bottom: 1rem;
+      text-align: justify;
+      word-break: keep-all;
+      line-height: 1.9;
+      color: #4b5563;
+      padding: 1rem;
+      background: linear-gradient(135deg, #f0f9ff 0%, #f0fdf4 100%);
+      border-left: 4px solid #3b82f6;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .dark .markdown-content p {
+      color: #d1d5db;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+      border-left-color: #60a5fa;
+    }
+
     /* 버튼 호버 효과 */
     .btn-primary {
       background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
@@ -757,7 +823,15 @@ const Career = ({ studentName }) => {
 
   return (
     <div className="glass rounded-3xl p-8">
-      <div className="markdown-content" dangerouslySetInnerHTML={{ __html: marked.parse(markdown) }} />
+      <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-3xl font-black gradient-text flex items-center gap-3">
+          <span className="text-4xl">🎯</span>
+          진로활동
+        </h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">진로와 직업, 창의적 체험활동 진로 영역</p>
+      </div>
+      <div className="markdown-content prose prose-lg dark:prose-invert max-w-none"
+           dangerouslySetInnerHTML={{ __html: marked.parse(markdown) }} />
     </div>
   );
 };
@@ -787,7 +861,15 @@ const Autonomy = ({ studentName }) => {
 
   return (
     <div className="glass rounded-3xl p-8">
-      <div className="markdown-content" dangerouslySetInnerHTML={{ __html: marked.parse(markdown) }} />
+      <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-3xl font-black gradient-text flex items-center gap-3">
+          <span className="text-4xl">✨</span>
+          자율활동
+        </h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">창의적 체험활동 자율 영역</p>
+      </div>
+      <div className="markdown-content prose prose-lg dark:prose-invert max-w-none"
+           dangerouslySetInnerHTML={{ __html: marked.parse(markdown) }} />
     </div>
   );
 };
@@ -817,7 +899,15 @@ const Behavior = ({ studentName }) => {
 
   return (
     <div className="glass rounded-3xl p-8">
-      <div className="markdown-content" dangerouslySetInnerHTML={{ __html: marked.parse(markdown) }} />
+      <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-3xl font-black gradient-text flex items-center gap-3">
+          <span className="text-4xl">⭐</span>
+          행동특성 및 종합의견
+        </h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">학년별 행동특성 및 담임 종합의견</p>
+      </div>
+      <div className="markdown-content prose prose-lg dark:prose-invert max-w-none"
+           dangerouslySetInnerHTML={{ __html: marked.parse(markdown) }} />
     </div>
   );
 };
