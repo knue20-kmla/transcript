@@ -18,6 +18,21 @@ def generate_markdown_for_student(student):
     # markdown 디렉토리 생성
     Path('markdown').mkdir(exist_ok=True)
 
+    # 1. 세특 마크다운 생성
+    generate_seteuk_markdown(student, student_name)
+
+    # 2. 진로활동 마크다운 생성
+    generate_career_markdown(student, student_name)
+
+    # 3. 자율활동 마크다운 생성
+    generate_autonomy_markdown(student, student_name)
+
+    # 4. 행동특성 마크다운 생성
+    generate_behavior_markdown(student, student_name)
+
+def generate_seteuk_markdown(student, student_name):
+    """세특 마크다운 생성"""
+
     # 과목군별 분류 (로마자 포함 강화)
     subject_groups = {
         '국어': ['국어', '현대문학 감상', '고전문학 감상', '한국 문학과 세계 문학', '생각하는 삶', '언어와 매체'],
@@ -91,6 +106,78 @@ def generate_markdown_for_student(student):
         print(f"✅ {group}: {len(items)}개 세특 → {filename}")
 
     print()
+
+def generate_career_markdown(student, student_name):
+    """진로활동 마크다운 생성"""
+    md_content = "# 진로활동\n\n"
+
+    진로활동 = student.get('진로활동', {})
+
+    # 진로와직업
+    진로와직업 = 진로활동.get('진로와직업', [])
+    if 진로와직업:
+        md_content += "## 진로와 직업\n\n"
+        for item in 진로와직업:
+            학년 = item.get('학년', '')
+            학기 = item.get('학기', '')
+            내용 = item.get('내용', '')
+            if 내용:
+                md_content += f"### {학년} {학기}\n\n{내용}\n\n"
+
+    # 창체진로
+    창체진로 = 진로활동.get('창체진로', [])
+    if 창체진로:
+        md_content += "## 창의적 체험활동 - 진로활동\n\n"
+        for item in 창체진로:
+            학년 = item.get('학년', '')
+            내용 = item.get('내용', '')
+            if 내용:
+                md_content += f"### {학년}\n\n{내용}\n\n"
+
+    if len(md_content) > 20:  # 내용이 있으면
+        filename = f"markdown/{student_name}_진로활동.md"
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(md_content)
+        print(f"✅ 진로활동 → {filename}")
+
+def generate_autonomy_markdown(student, student_name):
+    """자율활동 마크다운 생성"""
+    md_content = "# 자율활동\n\n"
+
+    자율활동 = student.get('자율활동', [])
+
+    if 자율활동:
+        md_content += "## 창의적 체험활동 - 자율활동\n\n"
+        for item in 자율활동:
+            학년 = item.get('학년', '')
+            내용 = item.get('내용', '')
+            if 내용:
+                md_content += f"### {학년}\n\n{내용}\n\n"
+
+    if len(md_content) > 20:  # 내용이 있으면
+        filename = f"markdown/{student_name}_자율활동.md"
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(md_content)
+        print(f"✅ 자율활동 → {filename}")
+
+def generate_behavior_markdown(student, student_name):
+    """행동특성 마크다운 생성"""
+    md_content = "# 행동특성 및 종합의견\n\n"
+
+    행동특성 = student.get('행동특성', [])
+
+    if 행동특성:
+        for item in 행동특성:
+            학년 = item.get('학년', '')
+            내용 = item.get('내용', '')
+            if 내용:
+                md_content += f"## {학년}\n\n{내용}\n\n"
+
+    if len(md_content) > 30:  # 내용이 있으면
+        filename = f"markdown/{student_name}_행동특성.md"
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(md_content)
+        print(f"✅ 행동특성 → {filename}")
 
 def generate_markdown():
     """모든 학생의 마크다운 생성"""
