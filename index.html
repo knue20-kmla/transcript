@@ -324,7 +324,7 @@ const highlightEvaluations = (html) => {
     '성실함', '성실한', '성실하게', '꼼꼼함', '꼼꼼한', '꼼꼼하게',
 
     // 사고력 표현
-    '창의적', '창의적으로', '창의성', '독창적', '독창적으로', '독창성',
+    '독창적', '독창적으로', '독창성',
     '심화', '심화된', '심도있는', '심도 있는', '깊이 있는', '깊이있는',
     '체계적', '체계적으로', '논리적', '논리적으로', '분석적', '분석적으로',
     '비판적', '비판적으로',
@@ -353,6 +353,14 @@ const highlightEvaluations = (html) => {
 
   let result = html;
 
+  // h1, h2, h3 태그 내용은 임시로 보호
+  const protectedSections = [];
+  result = result.replace(/(<h[123][^>]*>)(.*?)(<\/h[123]>)/gi, (match, openTag, content, closeTag) => {
+    const placeholder = `___PROTECTED_${protectedSections.length}___`;
+    protectedSections.push(match);
+    return placeholder;
+  });
+
   // 긍정적 키워드 하이라이트 (긴 키워드부터 처리)
   positiveKeywords.sort((a, b) => b.length - a.length).forEach(keyword => {
     const regex = new RegExp(`(${keyword})`, 'g');
@@ -363,6 +371,11 @@ const highlightEvaluations = (html) => {
   negativeKeywords.sort((a, b) => b.length - a.length).forEach(keyword => {
     const regex = new RegExp(`(${keyword})`, 'g');
     result = result.replace(regex, '<span class="highlight-negative">$1</span>');
+  });
+
+  // 보호된 섹션 복원
+  protectedSections.forEach((section, idx) => {
+    result = result.replace(`___PROTECTED_${idx}___`, section);
   });
 
   return result;
