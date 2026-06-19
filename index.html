@@ -732,6 +732,96 @@ const Seteuk = ({ studentName, subject, setSubject }) => {
   );
 };
 
+// 진로활동 탭
+const Career = ({ studentName }) => {
+  const [markdown, setMarkdown] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`${DATA_BASE}markdown/${studentName}_진로활동.md`)
+      .then(res => res.text())
+      .then(text => {
+        setMarkdown(text);
+        setLoading(false);
+      })
+      .catch(() => {
+        setMarkdown('# 진로활동\n\n데이터를 불러올 수 없습니다.');
+        setLoading(false);
+      });
+  }, [studentName]);
+
+  if (loading) {
+    return <div className="glass rounded-3xl p-12 text-center"><div className="animate-pulse text-gray-400">로딩 중...</div></div>;
+  }
+
+  return (
+    <div className="glass rounded-3xl p-8">
+      <div className="markdown-content" dangerouslySetInnerHTML={{ __html: marked.parse(markdown) }} />
+    </div>
+  );
+};
+
+// 자율활동 탭
+const Autonomy = ({ studentName }) => {
+  const [markdown, setMarkdown] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`${DATA_BASE}markdown/${studentName}_자율활동.md`)
+      .then(res => res.text())
+      .then(text => {
+        setMarkdown(text);
+        setLoading(false);
+      })
+      .catch(() => {
+        setMarkdown('# 자율활동\n\n데이터를 불러올 수 없습니다.');
+        setLoading(false);
+      });
+  }, [studentName]);
+
+  if (loading) {
+    return <div className="glass rounded-3xl p-12 text-center"><div className="animate-pulse text-gray-400">로딩 중...</div></div>;
+  }
+
+  return (
+    <div className="glass rounded-3xl p-8">
+      <div className="markdown-content" dangerouslySetInnerHTML={{ __html: marked.parse(markdown) }} />
+    </div>
+  );
+};
+
+// 행동특성 탭
+const Behavior = ({ studentName }) => {
+  const [markdown, setMarkdown] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`${DATA_BASE}markdown/${studentName}_행동특성.md`)
+      .then(res => res.text())
+      .then(text => {
+        setMarkdown(text);
+        setLoading(false);
+      })
+      .catch(() => {
+        setMarkdown('# 행동특성 및 종합의견\n\n데이터를 불러올 수 없습니다.');
+        setLoading(false);
+      });
+  }, [studentName]);
+
+  if (loading) {
+    return <div className="glass rounded-3xl p-12 text-center"><div className="animate-pulse text-gray-400">로딩 중...</div></div>;
+  }
+
+  return (
+    <div className="glass rounded-3xl p-8">
+      <div className="markdown-content" dangerouslySetInnerHTML={{ __html: marked.parse(markdown) }} />
+    </div>
+  );
+};
+
 // ==================== 메인 앱 ====================
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -800,6 +890,9 @@ function App() {
     { id: 'dashboard', name: '대시보드', icon: 'home' },
     { id: 'grades', name: '성적', icon: 'chart' },
     { id: 'seteuk', name: '세특', icon: 'book' },
+    { id: 'career', name: '진로활동', icon: 'user' },
+    { id: 'autonomy', name: '자율활동', icon: 'user' },
+    { id: 'behavior', name: '행동특성', icon: 'user' },
   ];
 
   // 로그인하지 않은 경우
@@ -979,6 +1072,9 @@ function App() {
               {activeTab === 'dashboard' && <Dashboard student={currentStudent} />}
               {activeTab === 'grades' && <Grades student={currentStudent} />}
               {activeTab === 'seteuk' && <Seteuk studentName={selectedStudent} subject={seSubject} setSubject={setSeSubject} />}
+              {activeTab === 'career' && <Career studentName={selectedStudent} />}
+              {activeTab === 'autonomy' && <Autonomy studentName={selectedStudent} />}
+              {activeTab === 'behavior' && <Behavior studentName={selectedStudent} />}
             </div>
           </div>
         </div>
