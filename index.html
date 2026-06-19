@@ -240,6 +240,35 @@
       border-left-color: #60a5fa;
     }
 
+    /* 평가 하이라이트 */
+    .highlight-positive {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      color: #92400e;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(252, 211, 77, 0.3);
+    }
+
+    .dark .highlight-positive {
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.3) 0%, rgba(245, 158, 11, 0.3) 100%);
+      color: #fbbf24;
+    }
+
+    .highlight-negative {
+      background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+      color: #991b1b;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(248, 113, 113, 0.3);
+    }
+
+    .dark .highlight-negative {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(220, 38, 38, 0.3) 100%);
+      color: #fca5a5;
+    }
+
     /* 버튼 호버 효과 */
     .btn-primary {
       background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
@@ -272,6 +301,42 @@ const { useState, useEffect, useMemo } = React;
 // ==================== 설정 ====================
 const DATA_BASE = 'https://raw.githubusercontent.com/knue20-kmla/transcript/main/data/';
 const GITHUB_BASE = 'https://raw.githubusercontent.com/knue20-kmla/transcript/main/markdown/';
+
+// 평가 표현 하이라이트 함수
+const highlightEvaluations = (html) => {
+  // 긍정적 평가 키워드
+  const positiveKeywords = [
+    '매우 뛰어남', '매우 우수함', '탁월함', '뛰어남', '우수함', '훌륭함', '뛰어난', '우수한', '탁월한',
+    '기대됨', '기대함', '기대되는', '높은 수준', '수준급', '눈에 띔', '돋보임', '두각',
+    '적극적', '열정적', '성실함', '꼼꼼함', '창의적', '독창적', '심화',
+    '심도있는', '깊이 있는', '체계적', '논리적', '분석적', '비판적',
+    '주도적', '리더십', '협력적', '소통 능력', '문제해결능력',
+    '발전가능성', '성장가능성', '잠재력', '역량', '전문성'
+  ];
+
+  // 부정적 평가 키워드
+  const negativeKeywords = [
+    '부족함', '미흡함', '아쉬움', '개선 필요', '노력 필요',
+    '소극적', '수동적', '피상적', '단편적', '표면적',
+    '부주의', '산만함', '집중력 부족', '이해 부족'
+  ];
+
+  let result = html;
+
+  // 긍정적 키워드 하이라이트
+  positiveKeywords.forEach(keyword => {
+    const regex = new RegExp(`(${keyword})`, 'g');
+    result = result.replace(regex, '<span class="highlight-positive">$1</span>');
+  });
+
+  // 부정적 키워드 하이라이트
+  negativeKeywords.forEach(keyword => {
+    const regex = new RegExp(`(${keyword})`, 'g');
+    result = result.replace(regex, '<span class="highlight-negative">$1</span>');
+  });
+
+  return result;
+};
 
 // ==================== 아이콘 ====================
 const Icon = ({ name, size = 20, className = "" }) => {
@@ -670,7 +735,8 @@ const Seteuk = ({ studentName, subject, setSubject }) => {
     fetch(`${GITHUB_BASE}${studentName}_세특_${subject}.md`)
       .then(res => res.text())
       .then(text => {
-        setMdContent(text);
+        const parsed = marked.parse(text);
+        setMdContent(highlightEvaluations(parsed));
         setLoading(false);
       })
       .catch(err => {
@@ -812,7 +878,8 @@ const Career = ({ studentName }) => {
     fetch(`${GITHUB_BASE}${studentName}_진로활동.md`)
       .then(res => res.text())
       .then(text => {
-        setMarkdown(text);
+        const parsed = marked.parse(text);
+        setMarkdown(highlightEvaluations(parsed));
         setLoading(false);
       })
       .catch(() => {
@@ -835,7 +902,7 @@ const Career = ({ studentName }) => {
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">진로와 직업, 창의적 체험활동 진로 영역</p>
       </div>
       <div className="markdown-content prose prose-lg dark:prose-invert max-w-none"
-           dangerouslySetInnerHTML={{ __html: marked.parse(markdown) }} />
+           dangerouslySetInnerHTML={{ __html: markdown }} />
     </div>
   );
 };
@@ -850,7 +917,8 @@ const Autonomy = ({ studentName }) => {
     fetch(`${GITHUB_BASE}${studentName}_자율활동.md`)
       .then(res => res.text())
       .then(text => {
-        setMarkdown(text);
+        const parsed = marked.parse(text);
+        setMarkdown(highlightEvaluations(parsed));
         setLoading(false);
       })
       .catch(() => {
@@ -873,7 +941,7 @@ const Autonomy = ({ studentName }) => {
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">창의적 체험활동 자율 영역</p>
       </div>
       <div className="markdown-content prose prose-lg dark:prose-invert max-w-none"
-           dangerouslySetInnerHTML={{ __html: marked.parse(markdown) }} />
+           dangerouslySetInnerHTML={{ __html: markdown }} />
     </div>
   );
 };
@@ -888,7 +956,8 @@ const Behavior = ({ studentName }) => {
     fetch(`${GITHUB_BASE}${studentName}_행동특성.md`)
       .then(res => res.text())
       .then(text => {
-        setMarkdown(text);
+        const parsed = marked.parse(text);
+        setMarkdown(highlightEvaluations(parsed));
         setLoading(false);
       })
       .catch(() => {
@@ -911,7 +980,7 @@ const Behavior = ({ studentName }) => {
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">학년별 행동특성 및 담임 종합의견</p>
       </div>
       <div className="markdown-content prose prose-lg dark:prose-invert max-w-none"
-           dangerouslySetInnerHTML={{ __html: marked.parse(markdown) }} />
+           dangerouslySetInnerHTML={{ __html: markdown }} />
     </div>
   );
 };
