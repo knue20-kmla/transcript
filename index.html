@@ -765,8 +765,7 @@ const Seteuk = ({ studentName, subject, setSubject }) => {
     fetch(`${GITHUB_BASE}${studentName}_세특_${subject}.md`)
       .then(res => res.text())
       .then(text => {
-        const parsed = marked.parse(text);
-        setMdContent(highlightEvaluations(parsed));
+        setMdContent(text); // 원본 마크다운 저장
         setLoading(false);
       })
       .catch(err => {
