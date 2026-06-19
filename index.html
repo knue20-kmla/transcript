@@ -304,33 +304,63 @@ const GITHUB_BASE = 'https://raw.githubusercontent.com/knue20-kmla/transcript/ma
 
 // 평가 표현 하이라이트 함수
 const highlightEvaluations = (html) => {
-  // 긍정적 평가 키워드
+  // 긍정적 평가 키워드 (더 적극적으로 확장)
   const positiveKeywords = [
-    '매우 뛰어남', '매우 우수함', '탁월함', '뛰어남', '우수함', '훌륭함', '뛰어난', '우수한', '탁월한',
-    '기대됨', '기대함', '기대되는', '높은 수준', '수준급', '눈에 띔', '돋보임', '두각',
-    '적극적', '열정적', '성실함', '꼼꼼함', '창의적', '독창적', '심화',
-    '심도있는', '깊이 있는', '체계적', '논리적', '분석적', '비판적',
-    '주도적', '리더십', '협력적', '소통 능력', '문제해결능력',
-    '발전가능성', '성장가능성', '잠재력', '역량', '전문성'
+    // 최상급 표현
+    '매우 뛰어남', '매우 우수함', '매우 훌륭', '극히 우수', '탁월함', '탁월한', '탁월하게',
+    '뛰어남', '뛰어난', '뛰어나게', '우수함', '우수한', '우수하게', '훌륭함', '훌륭한', '훌륭하게',
+
+    // 기대 표현
+    '기대됨', '기대함', '기대되는', '기대되며', '기대할', '기대가', '기대되고', '기대를',
+
+    // 수준/정도 표현
+    '높은 수준', '수준급', '높은 역량', '깊은 이해', '정확한', '정확하게',
+
+    // 시각적 표현
+    '눈에 띔', '눈에 띄는', '돋보임', '돋보이는', '두각', '주목할',
+
+    // 태도 표현
+    '적극적', '적극적으로', '적극성', '열정적', '열정적으로', '열정', '열의',
+    '성실함', '성실한', '성실하게', '꼼꼼함', '꼼꼼한', '꼼꼼하게',
+
+    // 사고력 표현
+    '창의적', '창의적으로', '창의성', '독창적', '독창적으로', '독창성',
+    '심화', '심화된', '심도있는', '심도 있는', '깊이 있는', '깊이있는',
+    '체계적', '체계적으로', '논리적', '논리적으로', '분석적', '분석적으로',
+    '비판적', '비판적으로',
+
+    // 리더십/협력
+    '주도적', '주도적으로', '주도하여', '리더십', '협력적', '협력하여',
+    '소통 능력', '소통능력', '문제해결능력', '문제 해결 능력',
+
+    // 잠재력
+    '발전가능성', '발전 가능성', '성장가능성', '성장 가능성', '잠재력', '잠재적',
+    '역량', '전문성', '능숙', '능숙하게',
+
+    // 결과 표현
+    '성공적', '성공적으로', '완성도', '완성도 높', '훌륭히', '완벽', '완벽하게'
   ];
 
   // 부정적 평가 키워드
   const negativeKeywords = [
-    '부족함', '미흡함', '아쉬움', '개선 필요', '노력 필요',
-    '소극적', '수동적', '피상적', '단편적', '표면적',
-    '부주의', '산만함', '집중력 부족', '이해 부족'
+    '부족함', '부족한', '부족하게', '미흡함', '미흡한', '미흡하게',
+    '아쉬움', '아쉬운', '아쉽게', '개선 필요', '노력 필요', '보완 필요',
+    '소극적', '소극적으로', '수동적', '수동적으로',
+    '피상적', '피상적으로', '단편적', '단편적으로', '표면적', '표면적으로',
+    '부주의', '부주의한', '산만함', '산만한', '집중력 부족', '이해 부족', '부족',
+    '미비', '미비한', '불충분', '불충분한', '불완전', '불완전한'
   ];
 
   let result = html;
 
-  // 긍정적 키워드 하이라이트
-  positiveKeywords.forEach(keyword => {
+  // 긍정적 키워드 하이라이트 (긴 키워드부터 처리)
+  positiveKeywords.sort((a, b) => b.length - a.length).forEach(keyword => {
     const regex = new RegExp(`(${keyword})`, 'g');
     result = result.replace(regex, '<span class="highlight-positive">$1</span>');
   });
 
-  // 부정적 키워드 하이라이트
-  negativeKeywords.forEach(keyword => {
+  // 부정적 키워드 하이라이트 (긴 키워드부터 처리)
+  negativeKeywords.sort((a, b) => b.length - a.length).forEach(keyword => {
     const regex = new RegExp(`(${keyword})`, 'g');
     result = result.replace(regex, '<span class="highlight-negative">$1</span>');
   });
@@ -856,7 +886,7 @@ const Seteuk = ({ studentName, subject, setSubject }) => {
                 <Icon name="chevronDown" className={`text-gray-400 smooth-transition ${openSections[idx] ? 'rotate-180' : ''}`} />
               </button>
               <div className={`accordion-content ${openSections[idx] ? 'open' : ''}`}>
-                <div className="px-6 pb-6 markdown" dangerouslySetInnerHTML={{ __html: marked.parse(sec.content) }} />
+                <div className="px-6 pb-6 markdown" dangerouslySetInnerHTML={{ __html: highlightEvaluations(marked.parse(sec.content)) }} />
               </div>
             </div>
           ))}
